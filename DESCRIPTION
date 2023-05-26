@@ -1,0 +1,10 @@
+Package: waterbom
+Title: Download water data collated by the Australian Bureau of Meteorology
+Version: 0.0.0.9000
+Authors@R: 
+    person("Callum", "Savage", , "callum.s.savage@gmail.com", role = c("aut", "cre"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
