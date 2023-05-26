@@ -1,5 +1,5 @@
 Package: waterbom
-Title: Download water data collated by the Australian Bureau of Meteorology
+Title: Download water data from the Australian Bureau of Meteorology
 Version: 0.0.0.9000
 Authors@R: 
     person("Callum", "Savage", , "callum.s.savage@gmail.com", role = c("aut", "cre"))
