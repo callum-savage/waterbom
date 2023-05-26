@@ -1,25 +1,17 @@
-
 # waterbom
 
-<!-- badges: start -->
-<!-- badges: end -->
+`waterbom` lets you download water data compiled by the Australian Bureau of Meteorology. Requests are made to the WISKI API using key-value pairs.
 
-The goal of waterbom is to ...
+## Design
 
-## Installation
+-   The list of arguments used in the API request is a `query`.
+-   Request functions start with `get_`, e.g. `get_timeseries()`
 
-You can install the development version of waterbom like so:
+## Development Roadmap
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
-```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(waterbom)
-## basic example code
-```
-
+-   [ ] Expose the API to arbitrary queries made using a query constructor function
+-   [ ] Return a tidy dataset for valid queries
+-   [ ] Return an informative error messge (including WISKI messages) for invalid queries
+-   [ ] Document the full set requests available to the user
+-   [ ] Provide a function to convert dataset responses into queries
+-   [ ] Create wrapper functions for common requests
