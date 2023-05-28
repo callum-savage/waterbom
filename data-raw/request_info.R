@@ -1,69 +1,65 @@
-# `getRequestInfo` returns details about the different requests which can be
-# made to the WISKI API:
-#
-#   - query fields
-#   - formats
-#   - return fields
-#   - optional fields
-#   - date formates
-#   - transformations
+# This script prepares internal package data describing possible requests, their
+# parameters, and return fields
 
-# Download the JSON file contining request info and convert it into a tibble
+library(dplyr)
+library(tidyr)
 
-request_info_json <- get_query_resp("getRequestInfo") |>
+request_info_json <- get_bom_data("getRequestInfo") |>
   httr2::resp_body_json()
 
-request_info <- tibble::tibble(request_info = request_info_json) |>
-  tidyr::unnest_wider(request_info) |>
-  dplyr::select(Requests) |>
-  tidyr::unnest_longer(Requests) |>
-  tidyr::unnest_wider(Requests)
+request_info <- tibble(request_info = request_info_json) |>
+  unnest_wider(request_info) |>
+  select(Requests) |>
+  unnest_longer(Requests) |>
+  unnest_wider(Requests)
 
 # Extract request descriptions
 
 requests <- request_info |>
-  dplyr::select(Request, Description, Subdescription)
+  select(Request, Description, Subdescription) |>
+  janitor::clean_names()
 
 # Most other information is nested in a consistent structure and can be
 # extracted using a helper function
 
-unpack_request_info <- function(request_info, list_col) {
+unpack_col <- function(request_info, list_col, list_col_name) {
   request_info |>
-    dplyr::select(Request, {{ list_col }}) |>
-    tidyr::unnest_wider({{ list_col }}) |>
-    dplyr::select(!Description) |>
-    tidyr::unnest_longer(Content) |>
-    tidyr::unnest_wider(Content) |>
-    dplyr::select(!any_of("Content_id"))
+    select(Request, {{ list_col }}) |>
+    unnest_wider({{ list_col }}) |>
+    select(!Description) |>
+    unnest_longer(Content) |>
+    unnest_wider(Content) |>
+    select(!any_of("Content_id")) |>
+    mutate(across(any_of("Description"), ~ na_if(.x, ""))) |>
+    janitor::clean_names() |>
+    rename("{{ list_col_name }}" := name)
 }
 
-request_query_fields    <- unpack_request_info(request_info, QueryFields)
-request_formats         <- unpack_request_info(request_info, Formats)
-request_return_fields   <- unpack_request_info(request_info, Returnfields)
-request_optional_fields <- unpack_request_info(request_info, Optionalfields)
-request_date_formats    <- unpack_request_info(request_info, Dateformats)
-request_transformations <- unpack_request_info(request_info, Transformations)
+query_fields <- unpack_col(request_info, QueryFields, query_field) |>
+  rename(wildcard = as_wildcard) |>
+  mutate(across(c(wildcard, comma_separated_list), ~ .x %in% c("yes", "(yes)")))
 
-# `request_transformations` still contains nested information. These fields
-# (attributes, returnfields, and examples) don't have a uniform structure so
-# I'll just convert them to character vectors
+formats <- unpack_col(request_info, Formats, format)
 
-unlist_cols <- function(col) {
-  purrr::map(col, unlist)
-}
+return_fields <- unpack_col(request_info, Returnfields, return_field)
 
-request_transformations <- request_transformations |>
-  dplyr::mutate(dplyr::across(dplyr::where(is.list), unlist_cols))
+optional_fields <- unpack_col(request_info, Optionalfields, optional_field)
 
-# Save data internally
+date_formats <- unpack_col(request_info, Dateformats, date_format)
+
+transformations <- unpack_col(request_info, Transformations, transformation) |>
+  mutate(across(where(is.list), ~ purrr::map(.x, unlist)))
+
+# Save data internally. Not all tables are used at present
 
 usethis::use_data(
   requests,
-  request_query_fields,
-  request_formats,
-  request_return_fields,
-  request_optional_fields,
-  request_date_formats,
-  request_transformations,
-  internal = TRUE
+  query_fields,
+  # formats,
+  return_fields,
+  optional_fields,
+  # date_formats,
+  # transformations,
+  internal = TRUE,
+  overwrite = TRUE
 )
