@@ -1,11 +1,14 @@
 # This script prepares internal package data describing possible requests, their
-# parameters, and return fields
+# parameters, and return fields.
+#
+# This information can be seen in a browser at the following url:
+#
+# http://www.bom.gov.au/waterdata/services?service=kisters&type=QueryServices&format=json&request=getRequestInfo
 
 library(dplyr)
 library(tidyr)
 
-request_info_json <- get_bom_data("getRequestInfo") |>
-  httr2::resp_body_json()
+request_info_json <- get_bom_data("getRequestInfo")
 
 request_info <- tibble(request_info = request_info_json) |>
   unnest_wider(request_info) |>
