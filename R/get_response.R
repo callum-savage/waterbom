@@ -1,5 +1,3 @@
-# TODO read delim without messages
-
 get_bom_response <- function(format, request, ..., max_tries = 1) {
   bom_url <- "http://www.bom.gov.au/waterdata/services"
   query <- list(
@@ -24,8 +22,17 @@ get_bom_data <- function(request, ...) {
     max_tries = 1
   )
   resp_body <- httr2::resp_body_string(resp)
-  bom_data <- readr::read_delim(resp_body, delim = ";")
-  bom_data
+  bom_col_types <- readr::cols(
+    station_id = readr::col_integer(),
+    station_latitude = readr::col_double(),
+    station_longitude = readr::col_double(),
+    .default = readr::col_character()
+  )
+  readr::read_delim(
+    resp_body,
+    delim = ";",
+    col_types = bom_col_types
+  )
 }
 
 body_error <- function(resp) {
