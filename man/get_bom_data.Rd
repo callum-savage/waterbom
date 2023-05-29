@@ -7,16 +7,21 @@
 get_bom_data(request, ...)
 }
 \arguments{
-\item{request}{Desired request e.g. "getStationList"}
+\item{request}{A character string defining the request type to pass on to the
+KISTERS API. Use \code{\link[=list_requests]{list_requests()}} to see available requests.}
 
-\item{...}{Optional key value pairs, passed on to \code{get_bom_response}}
+\item{...}{Optional key value pairs passed on to \code{\link[=get_bom_response]{get_bom_response()}}.}
 }
 \value{
-A tibble
+A tibble.
 }
 \description{
 Get BOM data
 }
 \examples{
 get_bom_data(request = "getStationList")
+}
+\seealso{
+\code{\link[=get_bom_response]{get_bom_response()}} for more fine-grained control over API
+requests.
 }

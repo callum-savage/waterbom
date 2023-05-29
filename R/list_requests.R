@@ -2,7 +2,7 @@
 #'
 #' @param request Optional request type to filter the response
 #'
-#' @return A tibble
+#' @returns A tibble
 #' @export
 #'
 #' @examples
