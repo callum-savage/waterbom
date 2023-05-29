@@ -1,3 +1,20 @@
+#' Get a response from the BOM API
+#'
+#' @param format Response content format
+#' @param request Request type
+#' @param ... Optional key value pairs
+#' @param max_tries Maximum number of times to retry the request if an error is
+#'   returned
+#'
+#' @return A response object
+#' @export
+#'
+#' @examples
+#' get_bom_response(
+#'   format = "json",
+#'   request = "getStationList",
+#'   parametertype_name = "Water Course Discharge"
+#' )
 get_bom_response <- function(format, request, ..., max_tries = 1) {
   bom_url <- "http://www.bom.gov.au/waterdata/services"
   query <- list(
@@ -14,6 +31,16 @@ get_bom_response <- function(format, request, ..., max_tries = 1) {
   httr2::req_perform(req)
 }
 
+#' Get BOM data
+#'
+#' @param request Desired request e.g. "getStationList"
+#' @param ... Optional key value pairs, passed on to `get_bom_response`
+#'
+#' @return A tibble
+#' @export
+#'
+#' @examples
+#' get_bom_data(request = "getStationList")
 get_bom_data <- function(request, ...) {
   resp <- get_bom_response(
     format = "csv",

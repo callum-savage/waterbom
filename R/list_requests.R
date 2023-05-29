@@ -1,10 +1,20 @@
-# TODO clean up names for internal data
-# TODO save internal data with a different name
-
+#' List request info
+#'
+#' @param request Optional request type to filter the response
+#'
+#' @return A tibble
+#' @export
+#'
+#' @examples
+#' list_requests()
+#'
+#' list_query_fields("getStationList")
 list_requests <- function() {
   dplyr::select(requests, request, description)
 }
 
+#' @rdname list_requests
+#' @export
 list_query_fields <- function(request = NULL) {
   if (!is.null(request)) {
     dplyr::filter(query_fields, request == {{ request }})
@@ -13,6 +23,8 @@ list_query_fields <- function(request = NULL) {
   }
 }
 
+#' @rdname list_requests
+#' @export
 list_return_fields <- function(request = NULL) {
   if (!is.null(request)) {
     dplyr::filter(return_fields, request == {{ request }})
@@ -21,6 +33,8 @@ list_return_fields <- function(request = NULL) {
   }
 }
 
+#' @rdname list_requests
+#' @export
 list_optional_fields <- function(request = NULL) {
   if (!is.null(request)) {
     dplyr::filter(optional_fields, request == {{ request }})
