@@ -21,7 +21,7 @@ list_return_fields <- function(request = NULL) {
   }
 }
 
-list_query_fields <- function(request = NULL) {
+list_optional_fields <- function(request = NULL) {
   if (!is.null(request)) {
     dplyr::filter(optional_fields, request == {{ request }})
   } else {
