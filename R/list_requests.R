@@ -1,26 +1,30 @@
 # TODO clean up names for internal data
 # TODO save internal data with a different name
 
-list_requests <- function(request_set = "recommended") {
-  rlang::arg_match(request_set, c("recommended", "all"))
-  request_list <- dplyr::select(requests, Request, Description)
-  recommended_requests <- c(
-    "getSiteList",
-    "getStationList",
-    "getParameterList",
-    "getTimeseriesList",
-    "getTimeseriesValues"
-  )
-  if (request_set == "recommended") {
-    request_list <- dplyr::filter(request_list, Request %in% recommended_requests)
-  }
-  request_list
+list_requests <- function() {
+  dplyr::select(requests, request, description)
 }
 
 list_query_fields <- function(request = NULL) {
-  query_fields_list <- dplyr::select(request_query_fields, Request, Name)
   if (!is.null(request)) {
-    query_fields_list <- dplyr::filter(query_fields_list, Request %in% request)
+    dplyr::filter(query_fields, request == {{ request }})
+  } else {
+    query_fields
   }
-  query_fields_list
+}
+
+list_return_fields <- function(request = NULL) {
+  if (!is.null(request)) {
+    dplyr::filter(return_fields, request == {{ request }})
+  } else {
+    return_fields
+  }
+}
+
+list_query_fields <- function(request = NULL) {
+  if (!is.null(request)) {
+    dplyr::filter(optional_fields, request == {{ request }})
+  } else {
+    optional_fields
+  }
 }
