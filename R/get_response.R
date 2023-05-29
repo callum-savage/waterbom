@@ -1,4 +1,11 @@
-get_bom_data <- function(request, ..., format = "json", max_tries = 1) {
+# TODO make a general purpose response handler which can handle different
+# formats
+#
+# TODO make a general purpose error handler which can extract errors from
+# different formats. This may not be necessary, as it seems that csv errors are
+# returned as xml. This may be the case for all types except for json.
+
+get_bom_response <- function(format, request, ..., max_tries = 1) {
   bom_url <- "http://www.bom.gov.au/waterdata/services"
   query <- list(
     service = "kisters",
@@ -11,28 +18,30 @@ get_bom_data <- function(request, ..., format = "json", max_tries = 1) {
   req <- httr2::req_url_query(req, !!!query)
   req <- httr2::req_error(req, body = body_error)
   req <- httr2::req_retry(req, max_tries = max_tries)
+  httr2::req_perform(req)
+}
 
-  resp <- httr2::req_perform(req)
-  resp_type <- httr2::resp_content_type(resp)
-  if (resp_type == "application/json") {
-    resp_body <- httr2::resp_body_json(resp)
-    bom_data <- resp_body
-  } else if (resp_type == "application/csv") {
-    resp_body <- httr2::resp_body_string(resp)
-    bom_data <- readr::read_delim(resp_body, delim = ";")
-  } else {
-    stop("Unkown response type: ", resp_type)
-  }
+get_bom_data <- function(request, ...) {
+  resp <- get_bom_response(
+    format = "csv",
+    request = request,
+    ...,
+    max_tries = max_tries
+  )
+  resp_body <- httr2::resp_body_string(resp)
+  bom_data <- readr::read_delim(resp_body, delim = ";")
   bom_data
 }
 
 body_error <- function(resp) {
-  resp_type <- httr2::resp_content_type(resp)
-  if (resp_type == "application/json") {
+  content_type <- httr2::resp_content_type(resp)
+  if (content_type == "application/json") {
     httr2::resp_body_json(resp)$message
-  } else if (resp_type == "text/xml") {
+  } else if (content_type == "text/xml") {
     xml2::xml_text(httr2::resp_body_xml(resp))
+  } else if (content_type == "text/html") {
+    xml2::xml_text(httr2::resp_body_html(resp))
   } else {
-    message("Unknown response type: ", resp_type)
+    "Unknown error response type"
   }
 }

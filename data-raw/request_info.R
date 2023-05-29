@@ -8,7 +8,11 @@
 library(dplyr)
 library(tidyr)
 
-request_info_json <- get_bom_data("getRequestInfo")
+request_info_json <- get_bom_response(
+    format = "json",
+    request = "getRequestInfo"
+  ) |>
+  httr2::resp_body_json()
 
 request_info <- tibble(request_info = request_info_json) |>
   unnest_wider(request_info) |>
