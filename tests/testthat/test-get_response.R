@@ -18,6 +18,14 @@ test_that("get_bom_response returns a valid response", {
   expect_true(httr2::resp_content_type(response) == "application/csv")
 })
 
+test_that("get_bom_response errors if arguments are invalid", {
+  expect_error(get_bom_response(format = "fakeformat", request = "getStationList"))
+  expect_error(get_bom_response(format = "json", request = "fakeRequest"))
+  expect_error(get_bom_response(format = "", request = ""))
+  expect_error(get_bom_response(format = "json"))
+  expect_error(get_bom_response(request = "getStationList"))
+})
+
 test_that("get_bom_data always returns a tibble", {
   # Valid request
   data1 <- get_bom_data(request = "getStationList", station_no = "G0060047")
