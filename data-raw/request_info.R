@@ -62,11 +62,11 @@ transformations <- unpack_col(request_info, Transformations, transformation) |>
 usethis::use_data(
   requests,
   query_fields,
-  # formats,
+  formats,
   return_fields,
   optional_fields,
-  # date_formats,
-  # transformations,
+  date_formats,
+  transformations,
   internal = TRUE,
   overwrite = TRUE
 )
