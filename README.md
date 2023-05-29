@@ -6,6 +6,9 @@
 
 -   The list of arguments used in the API request is a `query`.
 -   Request functions start with `get_`, e.g. `get_timeseries()`
+-   Every request function **must** have the argument `request` e.g. \`"getStationInfo"
+-   `get_bom_data` always returns a tibble. Perhaps format should always be csv? Lower level functions can be used to get raw responses
+-   waterbom leaves most of the error checking to the API and is permissive by design (i.e. you can make bad requests if you want)
 
 ## Development Roadmap
 
