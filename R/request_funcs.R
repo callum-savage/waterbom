@@ -13,12 +13,12 @@
 #'   BOM API. Use [list_requests()] to see available options.
 #' @param ... Optional named query fields which can be used to narrow the
 #'   request. Vectors of length greater than one will be collapsed into a comma
-#'   separated list. It is possible to use an asterix character (*) as wildcard
+#'   separated list. It is possible to use an asterix character '*' as a wildcard
 #'   in some fields, however this is not recommended as the naming conventions
 #'   can be inconsistent. Use [list_query_fields()] to see available options,
 #'   including fields which accept a comma separated list or wildcard.
 #'
-#' @returns A response object.
+#' @return A response object.
 #' @seealso [get_bom_data()] for a simplified API interface suitable for
 #'   requests that return rectangular data.
 #' @export
@@ -49,10 +49,13 @@ get_bom_response <- function(format, request, ...) {
 #' Get BOM data
 #'
 #' @inheritParams get_bom_response
-#'
+#' @param returnfields A character vector of columns to include in the returned
+#'   tibble. If not defined, the default columns will be determined by the API
+#'   depending on the request. Use [list_return_fields()] to see available
+#'   options.
 #' @seealso [get_bom_response()] for more fine-grained control over API
 #'   requests.
-#' @returns A tibble.
+#' @return A tibble with columns determined by `returnfields`.
 #' @export
 #'
 #' @examples
