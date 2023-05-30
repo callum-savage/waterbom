@@ -57,11 +57,12 @@ get_bom_response <- function(format, request, ...) {
 #'
 #' @examples
 #' get_bom_data(request = "getStationList")
-get_bom_data <- function(request, ...) {
+get_bom_data <- function(request, ..., returnfields = NULL) {
   resp <- get_bom_response(
     format = "csv",
     request = request,
-    ...
+    ...,
+    returnfields = returnfields
   )
   resp_body <- httr2::resp_body_string(resp)
   bom_data <- readr::read_delim(
