@@ -50,9 +50,8 @@ get_bom_response <- function(format, request, ...) {
 #'
 #' @inheritParams get_bom_response
 #' @param returnfields A character vector of columns to include in the returned
-#'   tibble. If not defined, the default columns will be determined by the API
-#'   depending on the request. Use [list_return_fields()] to see available
-#'   options.
+#'   tibble. If not defined, the default columns will be determined by the API.
+#'   Use [list_return_fields()] to see available options.
 #' @seealso [get_bom_response()] for more fine-grained control over API
 #'   requests.
 #' @return A tibble with columns determined by `returnfields`.
