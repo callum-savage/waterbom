@@ -119,12 +119,13 @@ get_timeseries_list <- function(station_no = NULL,
 }
 
 # period = "complete"
+# get_timeseries_values(ts_id = 83527010, from = "2020-01-01", to = "2020-01-02")
 get_timeseries_values <- function(ts_id,
                                   from = NULL,
                                   to = NULL,
                                   timezone = NULL,
                                   ...,
-                                  returnfields = NULL) {
+                                  returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")) {
   if (is.null(timezone)) {timezone <- "individual"}
   resp <- get_bom_response(
     format = "json",
@@ -137,8 +138,8 @@ get_timeseries_values <- function(ts_id,
     returnfields = returnfields
   )
   resp_body <- httr2::resp_body_json(resp)[[1]]
-  ts <- tibble::tibble(ts = resp_body$data)
-  ts <- tidyr::unnest_wider(ts, names_sep = "_")
+  ts <- tibble::tibble(ts_data = resp_body$data)
+  ts <- tidyr::unnest_wider(ts, ts_data, names_sep = "_")
   names(ts) <- unlist(stringr::str_split(resp_body$columns, ","))
 
   # An arbitrary number of metadata fields are also returned
