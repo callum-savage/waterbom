@@ -8,9 +8,14 @@ get_bom_data(request, ...)
 }
 \arguments{
 \item{request}{A character string defining the request type to pass on to the
-KISTERS API. Use \code{\link[=list_requests]{list_requests()}} to see available requests.}
+BOM API. Use \code{\link[=list_requests]{list_requests()}} to see available options.}
 
-\item{...}{Optional key value pairs passed on to \code{\link[=get_bom_response]{get_bom_response()}}.}
+\item{...}{Optional named query fields which can be used to narrow the
+request. Vectors of length greater than one will be collapsed into a comma
+separated list. It is possible to use an asterix character (*) as wildcard
+in some fields, however this is not recommended as the naming conventions
+can be inconsistent. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,
+including fields which accept a comma separated list or wildcard.}
 }
 \value{
 A tibble.

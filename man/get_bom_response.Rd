@@ -4,32 +4,32 @@
 \alias{get_bom_response}
 \title{Get a response from the BOM API}
 \usage{
-get_bom_response(format, request, ..., max_tries = 1)
+get_bom_response(format, request, ...)
 }
 \arguments{
-\item{format}{Response content format}
-
-\item{request}{A character string defining the request type to pass on to the
-KISTERS API. Use \code{\link[=list_requests]{list_requests()}} to see available requests.}
-
-\item{...}{Optional key value pairs which can be used to narrow down the
-request. Vectors of length greater than one will be collapsed into a comma
-separated list. It is possible to use an asterix character (*) as wildcard
-in some fields, however this is not recommended as the data naming
-conventions can be inconsistent. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available
+\item{format}{A string giving the format of the response content. Valid
+options will depend on the request. Use \code{\link[=list_formats]{list_formats()}} to see available
 options.}
 
-\item{max_tries}{Optional. Maximum number of times to retry the request if an
-error is returned. Passed on to \code{httr2::req_retry}.}
+\item{request}{A character string defining the request type to pass on to the
+BOM API. Use \code{\link[=list_requests]{list_requests()}} to see available options.}
+
+\item{...}{Optional named query fields which can be used to narrow the
+request. Vectors of length greater than one will be collapsed into a comma
+separated list. It is possible to use an asterix character (*) as wildcard
+in some fields, however this is not recommended as the naming conventions
+can be inconsistent. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,
+including fields which accept a comma separated list or wildcard.}
 }
 \value{
 A response object.
 }
 \description{
-Make an arbitrary request to the API, and receive the response object. This
-function is intentionally permissive, meaning that it will allow you to make
-any request that you like (so long as you specify format and request). No
-error checking is perfomed on the inputs.
+\code{get_bom_response} takes an arbitrary API request and returns the response
+object. Inputs are not error checked, allowing you to make requests which
+fall outside the scope of \code{\link[=get_bom_data]{get_bom_data()}}. This can be useful if you want to
+return an unconventional format (e.g. geojson), want make an uncommon
+request, or just want to interface directly with the API.
 }
 \examples{
 # Get a geojson file of discharge stations
@@ -40,6 +40,6 @@ get_bom_response(
 )
 }
 \seealso{
-\code{\link[=get_bom_data]{get_bom_data()}} for a simplified API interface which is suitable
-for most requests returning rectangular data.
+\code{\link[=get_bom_data]{get_bom_data()}} for a simplified API interface suitable for
+requests that return rectangular data.
 }
