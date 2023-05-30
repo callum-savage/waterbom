@@ -104,7 +104,7 @@ get_timeseries_list <- function(station_no = NULL,
                                   "ts_shortname",
                                   "coverage"
                                 )) {
-  timeseries_list <- get_bom_data(
+  ts_list <- get_bom_data(
     request = "getTimeseriesList",
     station_no = station_no,
     parametertype_name = parametertype_name,
@@ -115,18 +115,25 @@ get_timeseries_list <- function(station_no = NULL,
   )
   # Sort output by parameter for readability
   sort_cols <- c("station_no", "station_name", "parametertype_name", "ts_name")
-  dplyr::arrange(timeseries_list, dplyr::across(dplyr::any_of(sort_cols)))
+  dplyr::arrange(ts_list, dplyr::across(dplyr::any_of(sort_cols)))
 }
 
 # period = "complete"
+# ts_id only really required in metadata if multiple ts_id provided
 # get_timeseries_values(ts_id = 83527010, from = "2020-01-01", to = "2020-01-02")
+# get_timeseries_values(ts_id = c(169408010, 197867010), from = "2020-01-01", to = "2020-01-05")
+# TODO currently it's too fussy about ts_id - other metadata options should be fine too
 get_timeseries_values <- function(ts_id,
                                   from = NULL,
                                   to = NULL,
-                                  timezone = NULL,
+                                  timezone = "UTC",
                                   ...,
+                                  metadata = c("ts_id", "station_no"),
                                   returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")) {
-  if (is.null(timezone)) {timezone <- "individual"}
+  # If multiple timeseries requested, ensure that there is a unique key (ts_id)
+  if (!("ts_id" %in% metadata) & length(ts_id) > 1) {
+    metadata <- c(metadata, "ts_id")
+  }
   resp <- get_bom_response(
     format = "json",
     request = "getTimeseriesValues",
@@ -135,16 +142,19 @@ get_timeseries_values <- function(ts_id,
     to = to,
     timezone = timezone,
     ...,
+    metadata = "true",
+    md_returnfields = metadata,
     returnfields = returnfields
   )
-  resp_body <- httr2::resp_body_json(resp)[[1]]
-  ts <- tibble::tibble(ts_data = resp_body$data)
-  ts <- tidyr::unnest_wider(ts, ts_data, names_sep = "_")
-  names(ts) <- unlist(stringr::str_split(resp_body$columns, ","))
-
-  # An arbitrary number of metadata fields are also returned
-  # At present, these values are not passed on to the user
-  # resp_body[!(names(resp_body) %in% c("columns", "data"))]
-
-  ts
+  resp_body <- tibble::tibble(ts_list_col = httr2::resp_body_json(resp))
+  # Extract ts data from response
+  ts_data <- tidyr::unnest_wider(resp_body, ts_list_col)
+  ts_data <- dplyr::rename(ts_data, ts_list_col = data)
+  ts <- dplyr::select(ts_data, dplyr::any_of(c(metadata, "ts_list_col")))
+  ts <- tidyr::unnest_longer(ts, ts_list_col)
+  ts <- tidyr::unnest_wider(ts, ts_list_col, names_sep = "_")
+  # Apply column names
+  columns <- stringr::str_split(ts_data$columns, ",")[[1]]
+  names(ts)[stringr::str_detect(names(ts), "ts_list_col_\\d+")] <- columns
+  dplyr::arrange(ts, station_no, ts_id, Timestamp)
 }
