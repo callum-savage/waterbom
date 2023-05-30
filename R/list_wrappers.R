@@ -91,6 +91,7 @@ get_parameter_list <- function(station_no = NULL,
 #' get_timeseries_list(station_no = 609017)
 get_timeseries_list <- function(station_no = NULL,
                                 parametertype_name = NULL,
+                                ts_id = NULL,
                                 ts_name = NULL,
                                 ...,
                                 returnfields = c(
@@ -102,14 +103,46 @@ get_timeseries_list <- function(station_no = NULL,
                                   "ts_shortname",
                                   "coverage"
                                 )) {
-  bom_data <- get_bom_data(
+  timeseries_list <- get_bom_data(
     request = "getTimeseriesList",
     station_no = station_no,
     parametertype_name = parametertype_name,
+    ts_id = ts_id,
+    ts_name = ts_name,
     ...,
     returnfields = returnfields
   )
   # Sort output by parameter for readability
   sort_cols <- c("station_no", "station_name", "parametertype_name", "ts_name")
-  dplyr::arrange(bom_data, dplyr::across(dplyr::any_of(sort_cols)))
+  dplyr::arrange(timeseries_list, dplyr::across(dplyr::any_of(sort_cols)))
+}
+
+# period = "complete"
+get_timeseries_values <- function(ts_id,
+                                  from = NULL,
+                                  to = NULL,
+                                  timezone = NULL,
+                                  ...,
+                                  returnfields = NULL) {
+  if (is.null(timezone)) {timezone <- "individual"}
+  resp <- get_bom_response(
+    format = "json",
+    request = "getTimeseriesValues",
+    ts_id = ts_id,
+    from = from,
+    to = to,
+    timezone = timezone,
+    ...,
+    returnfields = returnfields
+  )
+  resp_body <- httr2::resp_body_json(resp)[[1]]
+  ts <- tibble::tibble(data = resp_body$data) |>
+    tidyr::unnest_wider(data, names_sep = "_")
+  names(ts) <- unlist(stringr::str_split(resp_body$columns, ","))
+
+  # An arbitrary number of metadata fields are also returned
+  # At present, these values are not passed on to the user
+  # resp_body[!(names(resp_body) %in% c("columns", "data"))]
+
+  ts
 }
