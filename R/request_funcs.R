@@ -13,9 +13,7 @@
 #'   BOM API. Use [list_requests()] to see available options.
 #' @param ... Optional named query fields which can be used to narrow the
 #'   request. Vectors of length greater than one will be collapsed into a comma
-#'   separated list. It is possible to use an asterix character '*' as a wildcard
-#'   in some fields, however this is not recommended as the naming conventions
-#'   can be inconsistent. Use [list_query_fields()] to see available options,
+#'   separated list. Use [list_query_fields()] to see available options,
 #'   including fields which accept a comma separated list or wildcard.
 #'
 #' @return A response object.

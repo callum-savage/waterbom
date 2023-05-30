@@ -12,15 +12,12 @@ BOM API. Use \code{\link[=list_requests]{list_requests()}} to see available opti
 
 \item{...}{Optional named query fields which can be used to narrow the
 request. Vectors of length greater than one will be collapsed into a comma
-separated list. It is possible to use an asterix character '*' as a wildcard
-in some fields, however this is not recommended as the naming conventions
-can be inconsistent. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,
+separated list. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,
 including fields which accept a comma separated list or wildcard.}
 
 \item{returnfields}{A character vector of columns to include in the returned
-tibble. If not defined, the default columns will be determined by the API
-depending on the request. Use \code{\link[=list_return_fields]{list_return_fields()}} to see available
-options.}
+tibble. If not defined, the default columns will be determined by the API.
+Use \code{\link[=list_return_fields]{list_return_fields()}} to see available options.}
 }
 \value{
 A tibble with columns determined by \code{returnfields}.

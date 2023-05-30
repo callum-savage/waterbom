@@ -14,25 +14,21 @@ get_station_list(
 )
 }
 \arguments{
-\item{station_no}{Optionally, a character vector of station numbers. Accepts an asterix
-'*' as a wildcard.}
+\item{station_no}{Optionally, a character vector of station numbers.}
 
-\item{station_name}{Optionally, a character vector of station names. Accepts an asterix
-'*' as a wildcard.}
+\item{station_name}{Optionally, a character vector of station names.}
 
-\item{parametertype_name}{Optionally, a character vector of parameters.
-Accepts an asterix '*' as a wildcard. This can be useful if, for instance, you are
-only interested in stations which measure 'Water Course Discharge'. Use
-\code{\link[=list_parameters]{list_parameters()}} to see available options.}
+\item{parametertype_name}{Optionally, a character vector of parameters. This
+can be useful if, for instance, you are only interested in stations which
+measure 'Water Course Discharge'. Use \code{\link[=list_parameters]{list_parameters()}} to see available
+options.}
 
 \item{bbox}{Optionally, a numeric vector of the form c(min_x, min_y, max_x,
 max_y) which can be used to get stations in a specific bounding box.}
 
 \item{...}{Optional named query fields which can be used to narrow the
 request. Vectors of length greater than one will be collapsed into a comma
-separated list. It is possible to use an asterix character '*' as a wildcard
-in some fields, however this is not recommended as the naming conventions
-can be inconsistent. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,
+separated list. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,
 including fields which accept a comma separated list or wildcard.}
 
 \item{returnfields}{A character vector of columns to include in the returned
