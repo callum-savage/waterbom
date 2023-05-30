@@ -22,6 +22,10 @@ can be useful if, for instance, you are only interested in stations which
 measure 'Water Course Discharge'. Use \code{\link[=list_parameters]{list_parameters()}} to see available
 options.}
 
+\item{ts_id}{temp}
+
+\item{ts_name}{temp}
+
 \item{...}{Optional named query fields which can be used to narrow the
 request. Vectors of length greater than one will be collapsed into a comma
 separated list. Use \code{\link[=list_query_fields]{list_query_fields()}} to see available options,

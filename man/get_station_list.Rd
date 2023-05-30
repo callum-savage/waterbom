@@ -32,7 +32,8 @@ separated list. Use \code{\link[=list_query_fields]{list_query_fields()}} to see
 including fields which accept a comma separated list or wildcard.}
 
 \item{returnfields}{A character vector of columns to include in the returned
-tibble. Use \link{list_query_fields("getStationList")} to see available options.}
+tibble. If not defined, the default columns will be determined by the API.
+Use \code{\link[=list_return_fields]{list_return_fields()}} to see available options.}
 }
 \value{
 A tibble with columns determined by \code{returnfields}.

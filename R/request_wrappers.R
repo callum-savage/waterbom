@@ -16,8 +16,6 @@
 #'   options.
 #' @param bbox Optionally, a numeric vector of the form c(min_x, min_y, max_x,
 #'   max_y) which can be used to get stations in a specific bounding box.
-#' @param returnfields A character vector of columns to include in the returned
-#'   tibble. Use [list_query_fields("getStationList")] to see available options.
 #'
 #' @export
 #'
@@ -85,6 +83,9 @@ get_parameter_list <- function(station_no = NULL,
 #' @inherit get_bom_data params return
 #' @inherit get_station_list params
 #'
+#' @param ts_id temp
+#' @param ts_name temp
+#'
 #' @export
 #'
 #' @examples
@@ -136,8 +137,8 @@ get_timeseries_values <- function(ts_id,
     returnfields = returnfields
   )
   resp_body <- httr2::resp_body_json(resp)[[1]]
-  ts <- tibble::tibble(data = resp_body$data) |>
-    tidyr::unnest_wider(data, names_sep = "_")
+  ts <- tibble::tibble(ts = resp_body$data)
+  ts <- tidyr::unnest_wider(ts, names_sep = "_")
   names(ts) <- unlist(stringr::str_split(resp_body$columns, ","))
 
   # An arbitrary number of metadata fields are also returned

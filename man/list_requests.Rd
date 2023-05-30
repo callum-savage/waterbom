@@ -5,6 +5,8 @@
 \alias{list_query_fields}
 \alias{list_return_fields}
 \alias{list_optional_fields}
+\alias{list_formats}
+\alias{list_parameters}
 \title{List request info}
 \usage{
 list_requests()
@@ -14,6 +16,10 @@ list_query_fields(request = NULL)
 list_return_fields(request = NULL)
 
 list_optional_fields(request = NULL)
+
+list_formats(request = NULL)
+
+list_parameters()
 }
 \arguments{
 \item{request}{Optional request type to filter the response}
