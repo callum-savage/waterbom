@@ -22,7 +22,7 @@ get_timeseries <- function(station_no = NULL,
     timezone = timezone,
     #...,
     returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type"),
-    metadata = c("station_no", "ts_name", "parametertype_name")
+    md_returnfields = c("station_no", "ts_name", "parametertype_name")
   )
 }
 

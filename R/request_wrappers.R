@@ -123,16 +123,19 @@ get_timeseries_list <- function(station_no = NULL,
 # get_timeseries_values(ts_id = 83527010, from = "2020-01-01", to = "2020-01-02")
 # get_timeseries_values(ts_id = c(169408010, 197867010), from = "2020-01-01", to = "2020-01-05")
 # TODO currently it's too fussy about ts_id - other metadata options should be fine too
+# TODO don't worry about renaming columns as ts_list_col etc, use use "data" in quotes
+# Also, column renaming code is inelegant
+# TODO treat timestamp
 get_timeseries_values <- function(ts_id,
                                   from = NULL,
                                   to = NULL,
                                   timezone = "UTC",
                                   ...,
-                                  metadata = c("ts_id", "station_no"),
+                                  md_returnfields = c("ts_id", "station_no"),
                                   returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")) {
   # If multiple timeseries requested, ensure that there is a unique key (ts_id)
-  if (!("ts_id" %in% metadata) & length(ts_id) > 1) {
-    metadata <- c(metadata, "ts_id")
+  if (!("ts_id" %in% md_returnfields) & length(ts_id) > 1) {
+    md_returnfields <- c(md_returnfields, "ts_id")
   }
   resp <- get_bom_response(
     format = "json",
@@ -143,18 +146,19 @@ get_timeseries_values <- function(ts_id,
     timezone = timezone,
     ...,
     metadata = "true",
-    md_returnfields = metadata,
+    md_returnfields = md_returnfields,
     returnfields = returnfields
   )
-  resp_body <- tibble::tibble(ts_list_col = httr2::resp_body_json(resp))
-  # Extract ts data from response
-  ts_data <- tidyr::unnest_wider(resp_body, ts_list_col)
-  ts_data <- dplyr::rename(ts_data, ts_list_col = data)
-  ts <- dplyr::select(ts_data, dplyr::any_of(c(metadata, "ts_list_col")))
-  ts <- tidyr::unnest_longer(ts, ts_list_col)
-  ts <- tidyr::unnest_wider(ts, ts_list_col, names_sep = "_")
-  # Apply column names
-  columns <- stringr::str_split(ts_data$columns, ",")[[1]]
-  names(ts)[stringr::str_detect(names(ts), "ts_list_col_\\d+")] <- columns
-  dplyr::arrange(ts, station_no, ts_id, Timestamp)
+  # Extract timeseries data from response
+  ts_data <- tibble::tibble("ts_data" = httr2::resp_body_json(resp))
+  ts_data <- tidyr::unnest_wider(ts_data, "ts_data")
+  ts <- dplyr::select(ts_data, dplyr::any_of(c(md_returnfields, "data")))
+  ts <- tidyr::unnest_longer(ts, "data")
+  ts <- tidyr::unnest_wider(ts, "data", names_sep = "_")
+  # Apply column names (clumsily)
+  columns <- unlist(stringr::str_split(ts_data$columns[[1]], ","))
+  names(ts)[stringr::str_detect(names(ts), "^data_\\d+$")] <- columns
+  # Convert timestamp character vector to datetime
+  ts$Timestamp <- lubridate::as_datetime(ts$Timestamp, tz = timezone)
+  ts
 }
