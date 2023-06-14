@@ -16,8 +16,8 @@
 #'   can be useful if, for instance, you are only interested in stations which
 #'   measure 'Water Course Discharge'. Use [list_parameters()] to see available
 #'   options.
-#' @param bbox Optionally, a numeric vector of the form c(min_x, min_y, max_x,
-#'   max_y) which can be used to get stations in a specific bounding box.
+#' @param bbox Optionally, a numeric vector of the form `c(min_x, min_y, max_x,
+#'   max_y)` which can be used to get stations in a specific bounding box.
 #'
 #' @export
 #'
