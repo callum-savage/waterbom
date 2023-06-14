@@ -1,21 +1,36 @@
 # waterbom
 
-`waterbom` lets you download water data compiled by the Australian Bureau of Meteorology. Requests are made to the WISKI API using key-value pairs.
+`waterbom` is an R package for downloading water data compiled by the Australian Bureau of Meteorology (BOM).
+
+While the BOM makes much of their water data available on the excellent [Water Data Online](http://www.bom.gov.au/waterdata/) (WDO), it can be difficult to download data in a way which is efficient and reproducible. `waterbom` aims to fix this issue.
+
+With `waterbom` you can:
+
+-   get data from multiple stations in a single request
+-   filter stations by name, location, owner, measured variables, and more
+-   access additional time series, including flood warning data
+-   ensure that your data analysis is reproducible
+
+I recommend that you use WDO to find the stations you're interested in, and then use `waterbom` for actually downloading the timeseries data.
 
 ## Design
 
--   The list of arguments used in the API request is a `query`.
--   Request functions start with `get_`, e.g. `get_timeseries()`
--   Every request function **must** have the argument `request` e.g. \`"getStationInfo"
--   `get_bom_data` always returns a tibble. Perhaps format should always be csv? Lower level functions can be used to get raw responses
--   waterbom leaves most of the error checking to the API and is permissive by design (i.e. you can make bad requests if you want)
--   Functions are stored in `request_funcs`, `request_wrappers`, or `ts_wrappers`
+The main user-facing functions are:
 
-## Development Roadmap
+-   `get_station_list()`
+-   `get_parameter_list()`
+-   `get_timeseries_list()`
+-   `get_timeseries()`
 
--   [x] Expose the API to arbitrary queries
--   [x] Return a tidy dataset for valid queries
--   [x] Return an informative error messge (including WISKI messages) for invalid queries
--   [ ] Document the full set requests available to the user
--   [ ] Provide a function to convert dataset responses into queries
--   [ ] Create wrapper functions for common requests
+These functions always return a `tibble`, with default columns selected to match the WDO interface. Columns are not renamed despite some unfortunate naming conventions used by the API. This is to ensure consistency between requests.
+
+There are two additional functions which may be useful to advanced users:
+
+-   `get_bom_data()` allows you to make an arbitrary data request.
+-   `get_bom_response()` is an advanced function which returns the response object with no processing. This can be useful for non-data API requests.
+
+## Queries
+
+Queries are made using key-value-pair requests. Most (but not all) of the error checking is left to the API, meaning that you can make bad requests if you want. The function documentation covers common use cases, however some query options are undocumented.
+
+## Typical usage

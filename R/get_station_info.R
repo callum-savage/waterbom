@@ -1,4 +1,6 @@
 # TODO document bbox crs (and test)
+# TODO by default, get_station_list should only return active stations
+# TODO restrict return fields; e.g. parametertype and object type can result in cross joins
 
 #' Get a list of gauging stations
 #'
@@ -72,4 +74,3 @@ get_parameter_list <- function(station_no = NULL,
     returnfields = returnfields
   )
 }
-ß
