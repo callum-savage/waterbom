@@ -2,16 +2,16 @@
 
 `waterbom` is an R package for downloading water data compiled by the Australian Bureau of Meteorology (BOM).
 
-While the BOM makes much of their water data available on the excellent [Water Data Online](http://www.bom.gov.au/waterdata/) (WDO), it can be difficult to download data in a way which is efficient and reproducible. `waterbom` aims to fix this issue.
+The BOM makes much of their water data available on the excellent [Water Data Online](http://www.bom.gov.au/waterdata/) (WDO) website, however it can be difficult to download data in a way which is **efficient** and **reproducible**. `waterbom` aims to fix this issue.
 
 With `waterbom` you can:
 
 -   get data from multiple stations in a single request
 -   filter stations by name, location, owner, measured variables, and more
 -   access additional time series, including flood warning data
--   ensure that your data analysis is reproducible
+-   ensure that your data analysis scripts are reproducible
 
-I recommend that you use WDO to find the stations you're interested in, and then use `waterbom` for actually downloading the timeseries data.
+I recommend that you use WDO to find the stations you're interested in, and then use `waterbom` for actually downloading the data.
 
 ## Design
 
@@ -22,7 +22,7 @@ The main user-facing functions are:
 -   `get_timeseries_list()`
 -   `get_timeseries()`
 
-These functions always return a `tibble`, with default columns selected to match the WDO interface. Columns are not renamed despite some unfortunate naming conventions used by the API. This is to ensure consistency between requests.
+These functions always return a `tibble`, with the default columns selected to match the WDO interface. Columns are not renamed despite some unfortunate naming conventions used by the API. This is to ensure consistency between requests.
 
 There are two additional functions which may be useful to advanced users:
 
