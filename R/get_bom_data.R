@@ -38,9 +38,11 @@ get_bom_response <- function(format, request, ...) {
   )
   # Collapse query fields into a comma separated list
   query_fields <- purrr::map(list(...), stringr::str_flatten_comma)
+  # Construct request
   req <- httr2::request(bom_url)
   req <- httr2::req_url_query(req, !!!c(query, query_fields))
   req <- httr2::req_error(req, body = body_error)
+  # Get response
   httr2::req_perform(req)
 }
 
