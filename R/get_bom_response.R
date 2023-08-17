@@ -100,17 +100,6 @@ get_bom_data <- function(request, ..., returnfields = NULL) {
   )
 }
 
-#' Check for errors in the body of a BOM API response
-#'
-#' Error messages are often contained in the body of the response and are not
-#' picked up by `httr` by default. This function extracts the error message in a
-#' way appropriate to each content type (json, xml, or html). Note that if an
-#' error occurs the returned content type does not necessarily match the
-#' requested format.
-#'
-#' @param resp A response object returned by the BOM API
-#'
-#' @return An error message
 body_error <- function(resp) {
   content_type <- httr2::resp_content_type(resp)
   if (content_type == "application/json") {

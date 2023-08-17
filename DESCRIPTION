@@ -3,11 +3,12 @@ Title: Download water data from the Australian Bureau of Meteorology
 Version: 0.0.0.9000
 Authors@R: 
     person("Callum", "Savage", , "callum.s.savage@gmail.com", role = c("aut", "cre"))
-Description: An set of functions for accessing the data compiled by the Australian Bureau of Meteorology.
+Description: An set of functions for accessing water data compiled by the Australian Bureau of Meteorology.
 License: MIT + file LICENSE
 Depends: 
     R (>= 2.10)
 Imports: 
+    cli (>= 3.6.1),
     dplyr (>= 1.1.2),
     httr2 (>= 0.2.2),
     lubridate (>= 1.9.2),

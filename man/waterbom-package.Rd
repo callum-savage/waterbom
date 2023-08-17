@@ -6,7 +6,7 @@
 \alias{waterbom-package}
 \title{waterbom: Download water data from the Australian Bureau of Meteorology}
 \description{
-An set of functions for accessing the data compiled by the Australian Bureau of Meteorology.
+An set of functions for accessing water data compiled by the Australian Bureau of Meteorology.
 }
 \author{
 \strong{Maintainer}: Callum Savage \email{callum.s.savage@gmail.com}
