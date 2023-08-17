@@ -1,10 +1,10 @@
 #' Get a response from the BOM API
 #'
 #' `get_bom_response` takes an arbitrary API request and returns the response
-#' object. Inputs are not error checked, allowing you to make requests which
-#' fall outside the scope of [get_bom_data()]. This can be useful if you want to
-#' return an unconventional format (e.g. geojson), want make an uncommon
-#' request, or just want to interface directly with the API.
+#' object. Inputs are not checked in any way, allowing you to make requests
+#' which fall outside the scope of [get_bom_data()] or [get_timeseries()]. This
+#' can be useful if you want to return an unconventional format (e.g. geojson),
+#' or just want to interface directly with the API.
 #'
 #' @param format A string giving the format of the response content. Valid
 #'   options will depend on the request. Use [list_formats()] to see available
@@ -13,8 +13,8 @@
 #'   BOM API. Use [list_requests()] to see available options.
 #' @param ... Optional named query fields which can be used to narrow the
 #'   request. Vectors of length greater than one will be collapsed into a comma
-#'   separated list. Use [list_query_fields()] to see available options,
-#'   including fields which accept a comma separated list or wildcard.
+#'   separated character string. Use [list_query_fields()] to see available
+#'   options, including fields which accept a comma separated list or wildcard.
 #'
 #' @return A response object.
 #' @seealso [get_bom_data()] for a simplified API interface suitable for
@@ -84,6 +84,17 @@ get_bom_data <- function(request, ..., returnfields = NULL) {
   )
 }
 
+#' Check for errors in the body of a BOM API response
+#'
+#' Error messages are often contained in the body of the response and are not
+#' picked up by `httr` by default. This function extracts the error message in a
+#' way appropriate to each content type (json, xml, or html). Note that if an
+#' error occurs the returned content type does not necessarily match the
+#' requested format.
+#'
+#' @param resp A response object returned by the BOM API
+#'
+#' @return An error message
 body_error <- function(resp) {
   content_type <- httr2::resp_content_type(resp)
   if (content_type == "application/json") {
