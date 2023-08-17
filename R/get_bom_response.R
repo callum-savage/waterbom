@@ -49,17 +49,33 @@ get_bom_response <- function(format, request, ...) {
 #' Get BOM data
 #'
 #' @inheritParams get_bom_response
+#' @param request A character string defining the request type to pass on to the
+#'   BOM API. Must be one of: `"getStationList"`, `"getParameterList"`, or
+#'   `"getTimeseriesList"`.
 #' @param returnfields A character vector of columns to include in the returned
 #'   tibble. If not defined, the default columns will be determined by the API.
 #'   Use [list_return_fields()] to see available options.
 #' @seealso [get_bom_response()] for more fine-grained control over API
 #'   requests.
-#' @return A tibble with columns determined by `returnfields`.
+#' @return A tibble with columns matching `returnfields`.
 #' @export
 #'
 #' @examples
 #' get_bom_data(request = "getStationList")
 get_bom_data <- function(request, ..., returnfields = NULL) {
+  # TODO rename to get_list()
+  valid_requests <- c(
+    "getStationList",
+    "getParameterList",
+    "getTimeseriesList"
+  )
+  if (!(request %in% valid_requests)) {
+    cli::cli_abort(c(
+              "Invalid request provided.",
+        "i" = "Valid requests are: {cli::cli_format(valid_requests)}",
+        "x" = "You tried to request \"{request}\"."
+    ))
+  }
   resp <- get_bom_response(
     format = "csv",
     request = request,
@@ -74,7 +90,7 @@ get_bom_data <- function(request, ..., returnfields = NULL) {
     na = "",
     progress = FALSE
   )
-  # Limited type conversion
+  # Perform limited type conversion
   numeric_cols <- c("station_latitude", "station_longitude")
   integer_cols <- c("station_id")
   dplyr::mutate(
