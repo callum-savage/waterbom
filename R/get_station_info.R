@@ -6,15 +6,18 @@
 #'
 #' `get_station_list` queries the BOM API and returns a table of station
 #' details. The list of stations can be narrowed by station number, station
-#' name, parameter, or geographic area (bbox).
+#' name, parameter, or geographic area (bbox). All filters are optional, however
+#' If no filters are applied, information will be returned on ALL stations (~
+#' 130,000 rows).
 #'
 #' @inherit get_bom_data params return
 #'
-#' @param station_no Optionally, a character vector of station numbers.
+#' @param station_no Optionally, a numeric or character vector of station
+#'   numbers.
 #' @param station_name Optionally, a character vector of station names.
 #' @param parametertype_name Optionally, a character vector of parameters. This
 #'   can be useful if, for instance, you are only interested in stations which
-#'   measure 'Water Course Discharge'. Use [list_parameters()] to see available
+#'   measure "Water Course Discharge". Use [list_parameters()] to see available
 #'   options.
 #' @param bbox Optionally, a numeric vector of the form `c(min_x, min_y, max_x,
 #'   max_y)` which can be used to get stations in a specific bounding box.
@@ -45,7 +48,7 @@ get_station_list <- function(station_no = NULL,
   )
 }
 
-#' Get a list of parameters measured at gauging stations
+#' Get a list of parameters measured at each station
 #'
 #' `get_parameter_list` queries the BOM API and returns a table of parameters
 #' measured at one or more gauging stations. The query can be narrowed to
