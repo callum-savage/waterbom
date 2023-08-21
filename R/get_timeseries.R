@@ -40,7 +40,13 @@ get_timeseries_list <- function(station_no = NULL,
   )
   # Sort output by parameter for readability
   sort_cols <- c("station_no", "station_name", "parametertype_name", "ts_name")
-  dplyr::arrange(ts_list, dplyr::across(dplyr::any_of(sort_cols)))
+  ts_list <- dplyr::arrange(ts_list, dplyr::across(dplyr::any_of(sort_cols)))
+  # Convert datetimes
+  datetime_cols <- c("from", "to")
+  dplyr::mutate(
+    ts_list,
+    dplyr::across(dplyr::any_of(datetime_cols), lubridate::as_datetime)
+  )
 }
 
 # period = "complete"
