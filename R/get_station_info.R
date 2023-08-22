@@ -1,7 +1,3 @@
-# TODO document bbox crs (and test)
-# TODO by default, get_station_list should only return active stations
-# TODO restrict return fields; e.g. parametertype and object type can result in cross joins
-
 #' Get a list of gauging stations
 #'
 #' `get_station_list` queries the BOM API and returns a table of station
@@ -25,7 +21,7 @@
 #' @export
 #'
 #' @examples
-#' get_station_list()
+#' get_station_list(bbox = c(136.816078, -32.136483, 138.760658, -30.052863))
 get_station_list <- function(station_no = NULL,
                              station_name = NULL,
                              parametertype_name = NULL,
@@ -60,7 +56,7 @@ get_station_list <- function(station_no = NULL,
 #' @export
 #'
 #' @examples
-#' get_parameter_list()
+#' get_parameter_list(station_no = "003203A")
 get_parameter_list <- function(station_no = NULL,
                                parametertype_name = NULL,
                                ...,

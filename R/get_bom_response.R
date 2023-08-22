@@ -17,8 +17,8 @@
 #'   options, including fields which accept a comma separated list or wildcard.
 #'
 #' @return A response object.
-#' @seealso [get_bom_data()] for a simplified API interface suitable for
-#'   requests that return rectangular data.
+#' @seealso [get_bom_data()] for a simplified API interface which is suited to
+#'   requests for rectangular data.
 #' @export
 #'
 #' @examples
@@ -41,6 +41,7 @@ get_bom_response <- function(format, request, ...) {
   # Construct request
   req <- httr2::request(bom_url)
   req <- httr2::req_url_query(req, !!!c(query, query_fields))
+  # Check for errors in the response body
   req <- httr2::req_error(req, body = body_error)
   # Get response
   httr2::req_perform(req)
@@ -63,7 +64,6 @@ get_bom_response <- function(format, request, ...) {
 #' @examples
 #' get_bom_data(request = "getStationList")
 get_bom_data <- function(request, ..., returnfields = NULL) {
-  # TODO rename to get_list()
   valid_requests <- c(
     "getStationList",
     "getParameterList",
