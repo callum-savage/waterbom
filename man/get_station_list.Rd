@@ -14,13 +14,14 @@ get_station_list(
 )
 }
 \arguments{
-\item{station_no}{Optionally, a character vector of station numbers.}
+\item{station_no}{Optionally, a numeric or character vector of station
+numbers.}
 
 \item{station_name}{Optionally, a character vector of station names.}
 
 \item{parametertype_name}{Optionally, a character vector of parameters. This
 can be useful if, for instance, you are only interested in stations which
-measure 'Water Course Discharge'. Use \code{\link[=list_parameters]{list_parameters()}} to see available
+measure "Water Course Discharge". Use \code{\link[=list_parameters]{list_parameters()}} to see available
 options.}
 
 \item{bbox}{Optionally, a numeric vector of the form \code{c(min_x, min_y, max_x, max_y)} which can be used to get stations in a specific bounding box.}
@@ -40,8 +41,10 @@ A tibble with columns matching \code{returnfields}.
 \description{
 \code{get_station_list} queries the BOM API and returns a table of station
 details. The list of stations can be narrowed by station number, station
-name, parameter, or geographic area (bbox).
+name, parameter, or geographic area (bbox). All filters are optional, however
+If no filters are applied, information will be returned on ALL stations (~
+130,000 rows).
 }
 \examples{
-get_station_list()
+get_station_list(bbox = c(136.816078, -32.136483, 138.760658, -30.052863))
 }

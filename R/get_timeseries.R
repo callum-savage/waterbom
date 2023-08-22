@@ -8,8 +8,9 @@
 #' @inherit get_bom_data params return
 #' @inherit get_station_list params
 #'
-#' @param ts_id temp
-#' @param ts_name temp
+#' @param ts_id Optionally, a specific time series. The id specifies both the
+#'   time series product and the station
+#' @param ts_name Optionally, the name of a specific time series
 #'
 #' @export
 #'
@@ -25,9 +26,7 @@ get_timeseries_list <- function(station_no = NULL,
                                   "station_name",
                                   "parametertype_name",
                                   "ts_id",
-                                  "ts_name",
-                                  "ts_shortname",
-                                  "coverage"
+                                  "ts_name"
                                 )) {
   ts_list <- get_bom_data(
     request = "getTimeseriesList",
@@ -56,7 +55,33 @@ get_timeseries_list <- function(station_no = NULL,
 # TODO currently it's too fussy about ts_id - other metadata options should be fine too
 # TODO don't worry about renaming columns as ts_list_col etc, use use "data" in quotes
 # Also, column renaming code is inelegant
-# TODO treat timestamp
+
+# TODO test interplay between to and from
+# TODO document timestamp formats
+# TODO test and document timezones
+
+#' Download a specific timeseries
+#'
+#' @inherit get_bom_data params return
+#'
+#' @param ts_id One or more timeseries ids. Each `ts_id` identifies both the
+#'   time series product and the station. Use ['get_timeseries_list'] to find a
+#'   timeseries id.
+#' @param from,to Optionally, timestamps defining the the start and end points
+#'   of the requested timeseries. `from` and `to` default to the begining and
+#'   end of the time series respectively. If no time is specified (e.g.
+#'   YYYY-MM-DD format) then values will be returned for the whole day.
+#' @param timezone The timezone in which to return time stamps. Defaults to UTC.
+#'   Note that stations record measurements in non-daylight savings local time.
+#' @param md_returnfields Optionally, additional metadata fields to include in
+#'   the response. This is important when requesting multiple time series as the
+#'   columns will otherwise be identical.
+#'
+#' @return A tibble with columns matching `md_returnfields` + `returnfields`.
+#' @export
+#'
+#' @examples
+#' get_timeseries_values(ts_id = 83527010, from = "2021-01-01", to = "2021-01-07")
 get_timeseries_values <- function(ts_id,
                                   from = NULL,
                                   to = NULL,
@@ -64,10 +89,6 @@ get_timeseries_values <- function(ts_id,
                                   ...,
                                   md_returnfields = c("ts_id", "station_no"),
                                   returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")) {
-  # If multiple timeseries requested, ensure that there is a unique key (ts_id)
-  if (!("ts_id" %in% md_returnfields) & length(ts_id) > 1) {
-    md_returnfields <- c(md_returnfields, "ts_id")
-  }
   resp <- get_bom_response(
     format = "json",
     request = "getTimeseriesValues",
@@ -94,7 +115,21 @@ get_timeseries_values <- function(ts_id,
   ts
 }
 
-# If you already know ts_id, use get_timeseries_values
+#' Download a timeseries for a specific station
+#'
+#' @param station_no
+#' @param ts_name
+#' @param parametertype_name
+#' @param from
+#' @param to
+#' @param timezone
+#' @param ...
+#' @param returnfields
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get_timeseries <- function(station_no = NULL,
                            ts_name = NULL,
                            parametertype_name = NULL,
@@ -116,7 +151,7 @@ get_timeseries <- function(station_no = NULL,
     from = from,
     to = to,
     timezone = timezone,
-    #...,
+    ...,
     returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type"),
     md_returnfields = c("station_no", "ts_name", "parametertype_name")
   )
@@ -130,10 +165,10 @@ get_timeseries <- function(station_no = NULL,
 #
 # get_timeseries_list()
 
-# get_timeseries(
-#   station_no = c("425004", "423005"),
-#   from = "2020-01-01",
-#   to = "2020-01-31",
-#   ts_name = "DMQaQc.Merged.AsStored.1",
-#   parametertype_name = "Water Course Level"
-# )
+get_timeseries(
+  station_no = c("425004", "423005"),
+  from = "2020-01-01",
+  to = "2020-01-31",
+  ts_name = "DMQaQc.Merged.AsStored.1",
+  parametertype_name = "Water Course Level"
+)

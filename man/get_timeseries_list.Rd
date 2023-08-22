@@ -11,20 +11,22 @@ get_timeseries_list(
   ts_name = NULL,
   ...,
   returnfields = c("station_no", "station_name", "parametertype_name", "ts_id",
-    "ts_name", "ts_shortname", "coverage")
+    "ts_name")
 )
 }
 \arguments{
-\item{station_no}{Optionally, a character vector of station numbers.}
+\item{station_no}{Optionally, a numeric or character vector of station
+numbers.}
 
 \item{parametertype_name}{Optionally, a character vector of parameters. This
 can be useful if, for instance, you are only interested in stations which
-measure 'Water Course Discharge'. Use \code{\link[=list_parameters]{list_parameters()}} to see available
+measure "Water Course Discharge". Use \code{\link[=list_parameters]{list_parameters()}} to see available
 options.}
 
-\item{ts_id}{temp}
+\item{ts_id}{Optionally, a specific time series. The id specifies both the
+time series product and the station}
 
-\item{ts_name}{temp}
+\item{ts_name}{Optionally, the name of a specific time series}
 
 \item{...}{Optional named query fields which can be used to narrow the
 request. Vectors of length greater than one will be collapsed into a comma

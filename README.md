@@ -40,13 +40,16 @@ There are two additional functions which may also be useful in some cases:
     -   [ ] Provide shortcuts for data owner, state, regulation, and time series limits (and potentially other selected optional fields)
     -   [ ] Provide a function to widen parameter list
     -   [ ] Limit query scope to useful fields
+    -   [ ] Make get_timeseries_values use get_bom_data
+    -   [ ] Combine md_return_fields with returnfields to simplify interface
 -   [ ] Error checking
     -   [ ] Unify type conversions into a single function
     -   [ ] Consolidate error checks into a single function
     -   [ ] Warn if user is going to create a cross join (e.g. parametertype and object type can result in cross joins)
 -   [ ] Documentation
     -   [ ] Add examples to all functions
-    -   [ ] Document date formats
+    -   [ ] Document date formats, and the interplay between from and to
+    -   [ ] Document timezones properly
     -   [ ] Document supported scope
         -   [ ] Requests
         -   [ ] Formats
@@ -58,6 +61,7 @@ There are two additional functions which may also be useful in some cases:
         -   [ ] Replace the existing `list_requests()` etc. functions
     -   [ ] Demonstrate typical usage in README
     -   [ ] Write a vignette demonstrating typical usage
+    -   [ ] Always point inhereted documentation at get_bom_data rather than get_station_list, if possible
 -   [ ] Testing
 -   [ ] Match the WDO interface
     -   [ ] Only return active stations, or similar, by default

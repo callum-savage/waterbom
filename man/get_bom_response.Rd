@@ -38,6 +38,6 @@ get_bom_response(
 )
 }
 \seealso{
-\code{\link[=get_bom_data]{get_bom_data()}} for a simplified API interface suitable for
-requests that return rectangular data.
+\code{\link[=get_bom_data]{get_bom_data()}} for a simplified API interface which is suited to
+requests for rectangular data.
 }

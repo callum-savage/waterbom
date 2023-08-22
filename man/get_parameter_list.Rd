@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_station_info.R
 \name{get_parameter_list}
 \alias{get_parameter_list}
-\title{Get a list of parameters measured at gauging stations}
+\title{Get a list of parameters measured at each station}
 \usage{
 get_parameter_list(
   station_no = NULL,
@@ -12,11 +12,12 @@ get_parameter_list(
 )
 }
 \arguments{
-\item{station_no}{Optionally, a character vector of station numbers.}
+\item{station_no}{Optionally, a numeric or character vector of station
+numbers.}
 
 \item{parametertype_name}{Optionally, a character vector of parameters. This
 can be useful if, for instance, you are only interested in stations which
-measure 'Water Course Discharge'. Use \code{\link[=list_parameters]{list_parameters()}} to see available
+measure "Water Course Discharge". Use \code{\link[=list_parameters]{list_parameters()}} to see available
 options.}
 
 \item{...}{Optional named query fields which can be used to narrow the
@@ -37,5 +38,5 @@ measured at one or more gauging stations. The query can be narrowed to
 specific parameters, specific stations, or a geographic area.
 }
 \examples{
-get_parameter_list()
+get_parameter_list(station_no = "003203A")
 }
