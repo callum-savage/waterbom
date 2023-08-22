@@ -27,10 +27,10 @@ There are two additional functions which may also be useful in some cases:
 
 ## Todo
 
--   [ ] Basic functionality (all 'get\_' functions)
-    -   [ ] Functions return data as provided by the API
-    -   [ ] All arguments are documented
-    -   [ ] Package passess checks without errors/comments/notes
+-   [x] Basic functionality (all 'get\_' functions)
+    -   [x] Functions return data as provided by the API
+    -   [x] All arguments are documented
+    -   [x] Package passess checks without errors/comments/notes
 -   [ ] Additional functionality
     -   [ ] Remove duplicates from requests (e.g. duplicate station numbers)
     -   [ ] Include tools for interpreting data quality and interpolation codes

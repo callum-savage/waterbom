@@ -48,24 +48,16 @@ get_timeseries_list <- function(station_no = NULL,
   )
 }
 
-# period = "complete"
-# ts_id only really required in metadata if multiple ts_id provided
-# get_timeseries_values(ts_id = 83527010, from = "2020-01-01", to = "2020-01-02")
-# get_timeseries_values(ts_id = c(169408010, 197867010), from = "2020-01-01", to = "2020-01-05")
-# TODO currently it's too fussy about ts_id - other metadata options should be fine too
-# TODO don't worry about renaming columns as ts_list_col etc, use use "data" in quotes
-# Also, column renaming code is inelegant
-
 # TODO test interplay between to and from
 # TODO document timestamp formats
 # TODO test and document timezones
 
 #' Download a specific timeseries
 #'
-#' @inherit get_bom_data params return
+#' @inherit get_bom_data params
 #'
 #' @param ts_id One or more timeseries ids. Each `ts_id` identifies both the
-#'   time series product and the station. Use ['get_timeseries_list'] to find a
+#'   time series product and the station. Use [get_timeseries_list()] to find a
 #'   timeseries id.
 #' @param from,to Optionally, timestamps defining the the start and end points
 #'   of the requested timeseries. `from` and `to` default to the begining and
@@ -81,7 +73,11 @@ get_timeseries_list <- function(station_no = NULL,
 #' @export
 #'
 #' @examples
-#' get_timeseries_values(ts_id = 83527010, from = "2021-01-01", to = "2021-01-07")
+#' get_timeseries_values(
+#'   ts_id = 83527010,
+#'   from = "2021-01-01",
+#'   to = "2021-01-07"
+#' )
 get_timeseries_values <- function(ts_id,
                                   from = NULL,
                                   to = NULL,
@@ -117,19 +113,21 @@ get_timeseries_values <- function(ts_id,
 
 #' Download a timeseries for a specific station
 #'
-#' @param station_no
-#' @param ts_name
-#' @param parametertype_name
-#' @param from
-#' @param to
-#' @param timezone
-#' @param ...
-#' @param returnfields
+#' @inherit get_bom_data params return
+#' @inherit get_timeseries_values params
+#' @inherit get_timeseries_list params
+#' @inherit get_station_list params
 #'
-#' @return
 #' @export
 #'
 #' @examples
+#' get_timeseries(
+#'   station_no = c("425004", "423005"),
+#'   from = "2020-01-01",
+#'   to = "2020-01-31",
+#'   ts_name = "DMQaQc.Merged.AsStored.1",
+#'   parametertype_name = "Water Course Level"
+#' )
 get_timeseries <- function(station_no = NULL,
                            ts_name = NULL,
                            parametertype_name = NULL,
@@ -156,19 +154,3 @@ get_timeseries <- function(station_no = NULL,
     md_returnfields = c("station_no", "ts_name", "parametertype_name")
   )
 }
-
-# station_no = c("425004", "423005")
-# from = "2020-01-01"
-# to = "2020-01-31"
-# ts_name = "DMQaQc.Merged.AsStored.1"
-# parametertype_name = "Water Course Level"
-#
-# get_timeseries_list()
-
-get_timeseries(
-  station_no = c("425004", "423005"),
-  from = "2020-01-01",
-  to = "2020-01-31",
-  ts_name = "DMQaQc.Merged.AsStored.1",
-  parametertype_name = "Water Course Level"
-)
