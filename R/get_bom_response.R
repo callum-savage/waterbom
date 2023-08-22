@@ -62,7 +62,10 @@ get_bom_response <- function(format, request, ...) {
 #' @export
 #'
 #' @examples
-#' get_bom_data(request = "getStationList")
+#' get_bom_data(
+#'   request = "getStationList",
+#'   parametertype_name = "Water Course Level"
+#' )
 get_bom_data <- function(request, ..., returnfields = NULL) {
   valid_requests <- c(
     "getStationList",
