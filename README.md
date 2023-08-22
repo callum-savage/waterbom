@@ -1,19 +1,17 @@
-# waterbom
+# waterbom (under construction).
 
-`waterbom` is an R package for downloading water data compiled by the Australian Bureau of Meteorology (BOM).
-
-The BOM makes much of their water data available on the excellent [Water Data Online](http://www.bom.gov.au/waterdata/) (WDO) website, however it can be difficult to download data in a way which is **efficient** and **reproducible**. `waterbom` aims to fix this issue.
+`waterbom` is an R package for downloading water data from [Water Data Online](http://www.bom.gov.au/waterdata/), a data portal maintained by the Australian Bureau of Meteorology (BOM).
 
 With `waterbom` you can:
 
--   get data from multiple stations in a single request
--   filter stations by name, location, owner, measured paramaters, and more
--   access additional station details and time series data, including flood warning data
--   write reproducible data analysis scripts
-
-I recommend that you use WDO to find the stations you're interested in, and then use `waterbom` for actually downloading the data.
+-   download data from multiple stations in a single request
+-   filter stations by name, location, data owner, and more
+-   access time series which aren't available on WDO, including flood warning data
+-   embed data download into reproducible data analysis scripts
 
 ## Design
+
+Queries are made using key-value-pair requests. Most (but not all) of the error checking is left to the API, meaning that you can make bad requests if you want.
 
 The main user-facing functions are:
 
@@ -22,18 +20,10 @@ The main user-facing functions are:
 -   `get_timeseries_list()`
 -   `get_timeseries()`
 
-These functions always return a `tibble`, with the default columns selected to match the WDO interface. Columns are not renamed despite some unfortunate naming conventions used by the API. This is to ensure consistency between requests.
-
-There are two additional functions which may be useful to advanced users:
+There are two additional functions which may also be useful in some cases:
 
 -   `get_bom_data()` allows you to make an arbitrary data request.
--   `get_bom_response()` is an advanced function which returns the response object with no processing. This can be useful for non-data API requests.
-
-## Queries
-
-Queries are made using key-value-pair requests. Most (but not all) of the error checking is left to the API, meaning that you can make bad requests if you want. The function documentation covers common use cases, however some query options are undocumented.
-
-## Typical usage
+-   `get_bom_response()` returns the response object with no processing. This can be useful for non-data API requests.
 
 ## Roadmap
 
