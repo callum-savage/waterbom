@@ -1,23 +1,24 @@
-#' Get BOM data
+# TODO: Make tibble references a link
+# TODO: Add details on which requests are supported
+
+#' Download data from Water Data Online
 #'
-#' @inheritParams get_bom_response
-#' @param request A character string defining the request type to pass on to the
-#'   BOM API. Must be one of: `"getStationList"`, `"getParameterList"`, or
-#'   `"getTimeseriesList"`.
-#' @param returnfields A character vector of columns to include in the returned
-#'   tibble. If not defined, the default columns will be determined by the API.
-#'   Use [list_return_fields()] to see available options.
-#' @seealso [get_bom_response()] for more fine-grained control over API
-#'   requests.
-#' @return A tibble with columns matching `returnfields`.
-#' @export
-#'
+#' @param request A character string defining the request type.
+#' @param returnfields Optionally, a character vector of columns to include in
+#'   the returned `tibble`. If not defined, the API will provide a sensible
+#'   default. Use [list_return_fields()] to see available options.
+#' @param ... Additional named query parameters which are passed on to the API.
+#'   Vectors of length greater than one will be collapsed into comma separated
+#'   character strings. Use [list_query_fields()] to see available options.
+#' @return A `tibble` containing the returned data.
+#' @seealso [get_bom_response()] to get the unmodified API response.
 #' @examples
 #' get_bom_data(
 #'   request = "getStationList",
 #'   parametertype_name = "Water Course Level"
 #' )
-get_bom_data <- function(request, ...) {
+#' @export
+get_bom_data <- function(request, returnfields = NULL, ...) {
   # List and timeseries requests need to be unpacked differently
   # TODO use list_requests(supported = TRUE) or similar instead
   list_requests <- c("getStationList", "getParameterList", "getTimeseriesList")
@@ -25,7 +26,7 @@ get_bom_data <- function(request, ...) {
   if (request %in% list_requests) {
     bom_data <- get_bom_list(request = request, ...)
   } else if (request %in% timeseries_requests) {
-    bom_data <- get_bom_timeseries(request = request, ...)
+    bom_data <- get_bom_timeseries(...)
   } else {
     # TODO polish this error message
     cli::cli_abort(c("Invalid request: {request}"))
@@ -36,6 +37,15 @@ get_bom_data <- function(request, ...) {
   bom_data
 }
 
+#' Title
+#'
+#' @param request
+#' @param returnfields
+#' @param ...
+#'
+#' @return
+#'
+#' @noRd
 get_bom_list <- function(request, returnfields = NULL, ...) {
   # Get response in csv format
   resp <- get_bom_response(
@@ -55,12 +65,25 @@ get_bom_list <- function(request, returnfields = NULL, ...) {
   )
 }
 
-# TODO warn if zero rows returned for a given timeseries and no metadata provided
-# to distinguish between timeseries
-get_bom_timeseries <- function(request, returnfields = NULL, md_returnfields = NULL, ...) {
+# TODO warn if zero rows returned for a given timeseries and no metadata
+# provided to distinguish between timeseries
+
+#' Download a timeseries from Water Data Online
+#'
+#' This function makes a 'getTimeseriesValues' request and unpacks the response
+#' into a tibble.
+#'
+#' @param returnfields
+#' @param md_returnfields
+#' @param ...
+#'
+#' @return A tibble containing the one or more timeseries.
+#'
+#' @noRd
+get_bom_timeseries <- function(ts_id, returnfields = NULL, md_returnfields = NULL, ...) {
   resp <- get_bom_response(
     format = "dajson", # data array json
-    request = request,
+    request = "getTimeseriesValues",
     ...,
     returnfields = returnfields
   )
@@ -77,37 +100,29 @@ get_bom_timeseries <- function(request, returnfields = NULL, md_returnfields = N
   # Expand each timestep into multiple columns
   ts5 <- tidyr::unnest_wider(ts4, col = "data", names_sep = "_")
   # Extract the correct timeseries names
-  ts_names <- unlist(stringr::str_split(ts2$columns[[1]], ","))
+  newnames <- unlist(stringr::str_split(ts2$columns[[1]], ","))
   # Identify the temporary timeseries names (of the form data_1, data_2, etc.)
-  ts_oldnames <- stringr::str_subset(names(ts5), "^data_\\d+$")
+  oldnames <- stringr::str_subset(names(ts5), "^data_\\d+$")
   # Replace old names with the new
-  # TODO check that length(ts_names) == length(ts_oldnames)
-  dplyr::rename_with(ts5, .fn = \(x) ts_names, .cols = dplyr::all_of(ts_oldnames))
+  # TODO check that length(newnames) == length(oldnames)
+  dplyr::rename_with(ts5, .fn = \(x) newnames, .cols = dplyr::all_of(oldnames))
 }
 
 #' Get a response from the BOM API
 #'
-#' `get_bom_response` takes an arbitrary API request and returns the response
+#' `get_bom_response()` takes an arbitrary API request and returns the response
 #' object. Inputs are not checked in any way, allowing you to make requests
-#' which fall outside the scope of [get_bom_data()] or [get_timeseries()]. This
-#' can be useful if you want to return an unconventional format (e.g. geojson),
-#' or just want to interface directly with the API.
+#' which fall outside the scope of [get_bom_data()]. This can be useful if you
+#' want to return an unconventional format (e.g. geojson), or just want to
+#' interface directly with the API.
+#'
+#' @inheritParams get_bom_data
 #'
 #' @param format A string giving the format of the response content. Valid
-#'   options will depend on the request. Use [list_formats()] to see available
-#'   options.
-#' @param request A character string defining the request type to pass on to the
-#'   BOM API. Use [list_requests()] to see available options.
-#' @param ... Optional named query fields which can be used to narrow the
-#'   request. Vectors of length greater than one will be collapsed into a comma
-#'   separated character string. Use [list_query_fields()] to see available
-#'   options, including fields which accept a comma separated list or wildcard.
-#'
-#' @return A response object.
+#'   options depend on `request`.
+#' @return A httr2 response object.
 #' @seealso [get_bom_data()] for a simplified API interface which is suited to
-#'   requests for rectangular data.
-#' @export
-#'
+#'   requesting rectangular data (including timeseries).
 #' @examples
 #' # Get a geojson file of discharge stations
 #' get_bom_response(
@@ -115,6 +130,7 @@ get_bom_timeseries <- function(request, returnfields = NULL, md_returnfields = N
 #'   request = "getStationList",
 #'   parametertype_name = "Water Course Discharge"
 #' )
+#' @export
 get_bom_response <- function(format, request, ...) {
   # Create a request object
   req <- httr2::request("http://www.bom.gov.au/waterdata/services")
@@ -136,11 +152,19 @@ get_bom_response <- function(format, request, ...) {
   httr2::req_perform(req)
 }
 
+#' Extract body errors
+#'
+#' Extract error messages from the body of a response object returned by the BOM
+#' API. Note that the API usually ignores the requested format when raising an
+#' error so not all formats need to be covered.
+#'
+#' @param resp A response object returned by `get_bom_response()`.
+#'
+#' @return A string containing an error message.
+#'
+#' @noRd
 extract_body_error <- function(resp) {
-  # httr2 doesn't read error messages in the response body by default. This
-  # function extracts body errors an appropriate method for each content type.
-  # Note that the API usually ignores the requested format when raising an
-  # error so not all formats need to be covered.
+  #
   content_type <- httr2::resp_content_type(resp)
   if (content_type == "application/json") {
     httr2::resp_body_json(resp)$message
@@ -153,8 +177,21 @@ extract_body_error <- function(resp) {
   }
 }
 
+#' Convert types of returned data
+#'
+#' All collumns returned by the API are character vectors. Most columns are left
+#' as characters, however some columns which have clear natural types (e.g.
+#' dates) which make them much easier to work with. This function applies those
+#' conversions.
+#'
+#' @param bom_data A tibble.
+#'
+#' @return `bom_data` with appropriate type conversions applied.
+#'
+#' @noRd
 convert_bom_types <- function(bom_data) {
   # TODO check that this works with timezones
+  # TODO this sould also be applied to values
   numeric_cols <- c("station_latitude", "station_longitude")
   integer_cols <- c("station_id")
   timestamp_cols <- c("Timestamp", "from", "to")
@@ -166,9 +203,19 @@ convert_bom_types <- function(bom_data) {
   )
 }
 
+#' Clean the column names of returned data
+#'
+#' Column names are converted using an explici name lookup (rather than, say
+#' `janitor::clean_names()`) so that the reverse process can easily be applied
+#' in future functions.
+#'
+#' @param bom_data A tibble.
+#'
+#' @return `bom_data` with harmonised column names.
+#'
+#' @noRd
 clean_bom_names <- function(bom_data) {
-  name_lookup = c(
-    # new = old
+  name_lookup <- c(
     "timestamp"          = "Timestamp",
     "value"              = "Value",
     "quality_code"       = "Quality Code",
