@@ -38,15 +38,27 @@ get_bom_response <- function(format, request, ...) {
   )
   # Collapse additional args into a comma separated list
   query_fields <- purrr::map(list(...), stringr::str_flatten_comma)
-  # Construct request
   req <- httr2::request(bom_url)
   req <- httr2::req_url_query(req, !!!c(query, query_fields))
   # Check for errors in the response body
-  req <- httr2::req_error(req, body = body_error)
-  # Get response
+  req <- httr2::req_error(req, body = extract_body_errors)
   httr2::req_perform(req)
 }
 
+extract_body_errors <- function(resp) {
+  content_type <- httr2::resp_content_type(resp)
+  if (content_type == "application/json") {
+    httr2::resp_body_json(resp)$message
+  } else if (content_type == "text/xml") {
+    xml2::xml_text(httr2::resp_body_xml(resp))
+  } else if (content_type == "text/html") {
+    xml2::xml_text(httr2::resp_body_html(resp))
+  } else {
+    "Unknown error response type"
+  }
+}
+
+# TODO remove explicit returnfields arg
 #' Get BOM data
 #'
 #' @inheritParams get_bom_response
@@ -67,51 +79,75 @@ get_bom_response <- function(format, request, ...) {
 #'   parametertype_name = "Water Course Level"
 #' )
 get_bom_data <- function(request, ..., returnfields = NULL) {
-  valid_requests <- c(
-    "getStationList",
-    "getParameterList",
-    "getTimeseriesList"
+  # List and timeseries responses are unpacked differently
+  if (request %in% c("getStationList", "getParameterList", "getTimeseriesList")) {
+    bom_data <- get_bom_list(request = request, ..., returnfields = returnfields)
+  } else if (request == "getTimeseriesValues") {
+    bom_data <- get_bom_timeseries(request = request, ..., returnfields = returnfields)
+  } else
+    # TODO polish this error message
+    # TODO add info on provided request, and what would be valid
+    cli::cli_abort(c("Invalid request."))
+  # TODO move type conversion to separate function
+  # Perform limited type conversion
+  numeric_cols <- c("station_latitude", "station_longitude")
+  integer_cols <- c("station_id")
+  timestamp_cols <- c("Timestamp", "from", "to")
+  dplyr::mutate(
+    bom_data,
+    dplyr::across(dplyr::any_of(numeric_cols), as.numeric),
+    dplyr::across(dplyr::any_of(integer_cols), as.integer),
+    dplyr::across(dplyr::any_of(timestamp_cols), lubridate::as_datetime)
   )
-  if (!(request %in% valid_requests)) {
-    cli::cli_abort(c(
-              "Invalid request provided.",
-        "i" = "Valid requests are: {cli::cli_format(valid_requests)}",
-        "x" = "You tried to request \"{request}\"."
-    ))
-  }
+  # TODO make a function for name cleaning
+}
+
+get_bom_list <- function(request, ..., returnfields = NULL) {
+  # Get response in csv format
   resp <- get_bom_response(
     format = "csv",
     request = request,
     ...,
     returnfields = returnfields
   )
+  # Read csv from response body
   resp_body <- httr2::resp_body_string(resp)
-  bom_data <- readr::read_delim(
+  readr::read_delim(
     resp_body,
     delim = ";",
     col_types = readr::cols(.default = readr::col_character()),
     na = "",
     progress = FALSE
   )
-  # Perform limited type conversion
-  numeric_cols <- c("station_latitude", "station_longitude")
-  integer_cols <- c("station_id")
-  dplyr::mutate(
-    bom_data,
-    dplyr::across(dplyr::any_of(numeric_cols), as.numeric),
-    dplyr::across(dplyr::any_of(integer_cols), as.integer)
-  )
 }
 
-body_error <- function(resp) {
-  content_type <- httr2::resp_content_type(resp)
-  if (content_type == "application/json") {
-    httr2::resp_body_json(resp)$message
-  } else if (content_type == "text/xml") {
-    xml2::xml_text(httr2::resp_body_xml(resp))
-  } else if (content_type == "text/html") {
-    xml2::xml_text(httr2::resp_body_html(resp))
-  } else {
-    "Unknown error response type"
-  }
+# TODO warn if zero rows returned for a given station
+# TODO md_returnfields should be an explicit arg
+# TODO keep empty rows when unnesting
+get_bom_timeseries <- function(request, ..., returnfields = NULL) {
+  resp <- get_bom_response(
+    format = "json",
+    request = request,
+    ...,
+    returnfields = returnfields
+  )
+  resp_body <- httr2::resp_body_json(resp)
+  # Unpack json response into a nested tibble with one row per timeseries
+  ts1 <- tibble::tibble("resp_body" = resp_body)
+  # Expand resp_body into columns (timeseries is still nested)
+  ts2 <- tidyr::unnest_wider(ts1, col = "resp_body")
+  # Select columns which will be returned
+  # The timeseries is returned in a column called "data"
+  ts3 <- dplyr::select(ts2, dplyr::any_of(c(md_returnfields, "data")))
+  # Unnest timeseries from "data" column
+  ts4 <- tidyr::unnest_longer(ts3, col = "data")
+  ts5 <- tidyr::unnest_wider(ts4, col = "data", names_sep = "_")
+  # The timeseries' column names were returned as metadata
+  # Extract the correct timeseries names
+  ts_names <- unlist(stringr::str_split(ts2$columns[[1]], ","))
+  # Identify the temporary timeseries names (of the form data_1, data_2, etc.)
+  ts_oldnames <- stringr::str_subset(names(ts5), "^data_\\d+$")
+  # Replace old names with the new
+  # TODO check that length(ts_names) == length(ts_oldnames)
+  dplyr::rename_with(ts5, .fn = \(x) ts_names, .cols = dplyr::all_of(ts_oldnames))
 }
