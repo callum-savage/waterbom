@@ -18,15 +18,18 @@
 #'   parametertype_name = "Water Course Level"
 #' )
 get_bom_data <- function(request, ...) {
+  list_requests <- c("getStationList", "getParameterList", "getTimeseriesList")
+  timeseries_requests <- c("getTimeseriesValues")
   # List and timeseries responses are unpacked differently
-  if (request %in% c("getStationList", "getParameterList", "getTimeseriesList")) {
+  if (request %in% list_requests) {
     bom_data <- get_bom_list(request = request, ...)
-  } else if (request == "getTimeseriesValues") {
+  } else if (request %in% timeseries_requests) {
     bom_data <- get_bom_timeseries(request = request, ...)
-  } else
+  } else {
     # TODO polish this error message
     # TODO add info on provided request, and what would be valid
     cli::cli_abort(c("Invalid request."))
+  }
   # TODO move type conversion to separate function
   # Perform limited type conversion
   numeric_cols <- c("station_latitude", "station_longitude")
