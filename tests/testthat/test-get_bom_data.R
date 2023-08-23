@@ -48,6 +48,7 @@ test_that("get_bom_response errors if arguments are invalid", {
 })
 
 test_that("get_bom_response returns error messages from the response body", {
+
 })
 
 test_that("get_bom_data always returns a tibble", {
@@ -86,3 +87,10 @@ test_that("get_bom_data works for all supported request types", {
   expect_equal(dim(timeseries_values), c(2, 2))
 })
 
+test_that("getTimeseriesValues requests 0-length results explicitly", {
+
+})
+
+test_that("Column types are converted as expected", {
+
+})

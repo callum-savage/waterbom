@@ -18,30 +18,22 @@
 #'   parametertype_name = "Water Course Level"
 #' )
 get_bom_data <- function(request, ...) {
+  # List and timeseries requests need to be unpacked differently
+  # TODO use list_requests(supported = TRUE) or similar instead
   list_requests <- c("getStationList", "getParameterList", "getTimeseriesList")
   timeseries_requests <- c("getTimeseriesValues")
-  # List and timeseries responses are unpacked differently
   if (request %in% list_requests) {
     bom_data <- get_bom_list(request = request, ...)
   } else if (request %in% timeseries_requests) {
     bom_data <- get_bom_timeseries(request = request, ...)
   } else {
     # TODO polish this error message
-    # TODO add info on provided request, and what would be valid
-    cli::cli_abort(c("Invalid request."))
+    cli::cli_abort(c("Invalid request: {request}"))
   }
-  # TODO move type conversion to separate function
-  # Perform limited type conversion
-  numeric_cols <- c("station_latitude", "station_longitude")
-  integer_cols <- c("station_id")
-  timestamp_cols <- c("Timestamp", "from", "to")
-  dplyr::mutate(
-    bom_data,
-    dplyr::across(dplyr::any_of(numeric_cols), as.numeric),
-    dplyr::across(dplyr::any_of(integer_cols), as.integer),
-    dplyr::across(dplyr::any_of(timestamp_cols), lubridate::as_datetime)
-  )
-  # TODO make a function for name cleaning
+  # Tidy up and return data
+  bom_data <- convert_bom_types(bom_data)
+  bom_data <- clean_bom_names(bom_data)
+  bom_data
 }
 
 get_bom_list <- function(request, returnfields = NULL, ...) {
@@ -148,7 +140,7 @@ extract_body_error <- function(resp) {
   # httr2 doesn't read error messages in the response body by default. This
   # function extracts body errors an appropriate method for each content type.
   # Note that the API usually ignores the requested format when raising an
-  # error, so not all formats need to be covered.
+  # error so not all formats need to be covered.
   content_type <- httr2::resp_content_type(resp)
   if (content_type == "application/json") {
     httr2::resp_body_json(resp)$message
@@ -159,4 +151,28 @@ extract_body_error <- function(resp) {
   } else {
     stringr::str_glue("Body has unknown content type: {content_type}")
   }
+}
+
+convert_bom_types <- function(bom_data) {
+  # TODO check that this works with timezones
+  numeric_cols <- c("station_latitude", "station_longitude")
+  integer_cols <- c("station_id")
+  timestamp_cols <- c("Timestamp", "from", "to")
+  dplyr::mutate(
+    bom_data,
+    dplyr::across(dplyr::any_of(numeric_cols), as.numeric),
+    dplyr::across(dplyr::any_of(integer_cols), as.integer),
+    dplyr::across(dplyr::any_of(timestamp_cols), lubridate::as_datetime)
+  )
+}
+
+clean_bom_names <- function(bom_data) {
+  name_lookup = c(
+    # new = old
+    timestamp = "Timestamp",
+    value = "Value",
+    quality_code = "Quality Code",
+    interpolation_type = "Interpolation Type"
+  )
+  rename(bom_data, any_of(name_lookup))
 }
