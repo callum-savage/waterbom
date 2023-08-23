@@ -86,12 +86,12 @@ extract_body_error <- function(resp) {
 #'   request = "getStationList",
 #'   parametertype_name = "Water Course Level"
 #' )
-get_bom_data <- function(request, ..., returnfields = NULL) {
+get_bom_data <- function(request, ...) {
   # List and timeseries responses are unpacked differently
   if (request %in% c("getStationList", "getParameterList", "getTimeseriesList")) {
-    bom_data <- get_bom_list(request = request, ..., returnfields = returnfields)
+    bom_data <- get_bom_list(request = request, ...)
   } else if (request == "getTimeseriesValues") {
-    bom_data <- get_bom_timeseries(request = request, ..., returnfields = returnfields)
+    bom_data <- get_bom_timeseries(request = request, ...)
   } else
     # TODO polish this error message
     # TODO add info on provided request, and what would be valid
@@ -110,13 +110,13 @@ get_bom_data <- function(request, ..., returnfields = NULL) {
   # TODO make a function for name cleaning
 }
 
-get_bom_list <- function(request, ..., returnfields = NULL) {
+get_bom_list <- function(request, returnfields = NULL, ...) {
   # Get response in csv format
   resp <- get_bom_response(
     format = "csv",
     request = request,
-    ...,
-    returnfields = returnfields
+    returnfields = returnfields,
+    ...
   )
   # Read csv from response body
   resp_body <- httr2::resp_body_string(resp)
@@ -132,7 +132,7 @@ get_bom_list <- function(request, ..., returnfields = NULL) {
 # TODO warn if zero rows returned for a given station
 # TODO md_returnfields should be an explicit arg
 # TODO keep empty rows when unnesting
-get_bom_timeseries <- function(request, ..., returnfields = NULL) {
+get_bom_timeseries <- function(request, returnfields = NULL, md_returnfields = NULL, ...) {
   resp <- get_bom_response(
     format = "json",
     request = request,

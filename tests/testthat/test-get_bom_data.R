@@ -78,13 +78,11 @@ test_that("get_bom_data works for all supported request types", {
     request = "getTimeseriesValues",
     ts_id = c(254923010, 255253010),
     from = "2020-01-01",
-    to = "2020-01-02",
-    md_returnfields = c("ts_id", "station_no"),
-    returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")
+    to = "2020-01-02"
   )
   expect_equal(dim(station_list), c(2, 5))
   expect_equal(dim(parameter_list), c(4, 6))
   expect_equal(dim(timeseries_list), c(100, 7))
-  expect_equal(dim(timeseries_values), c(2, 5))
+  expect_equal(dim(timeseries_values), c(2, 2))
 })
 
