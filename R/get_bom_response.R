@@ -37,15 +37,20 @@ get_bom_response <- function(format, request, ...) {
     request = request
   )
   # Collapse additional args into a comma separated list
+  # TODO remove duplicates from query fields
   query_fields <- purrr::map(list(...), stringr::str_flatten_comma)
   req <- httr2::request(bom_url)
   req <- httr2::req_url_query(req, !!!c(query, query_fields))
   # Check for errors in the response body
-  req <- httr2::req_error(req, body = extract_body_errors)
+  req <- httr2::req_error(req, body = extract_body_error)
   httr2::req_perform(req)
 }
 
-extract_body_errors <- function(resp) {
+extract_body_error <- function(resp) {
+  # httr2 doesn't read error messages in the response body by default. This
+  # function extracts body errors an appropriate method for each content type.
+  # Note that the API usually ignores the requested format when raising an
+  # error, so not all formats need to be covered.
   content_type <- httr2::resp_content_type(resp)
   if (content_type == "application/json") {
     httr2::resp_body_json(resp)$message
@@ -54,7 +59,7 @@ extract_body_errors <- function(resp) {
   } else if (content_type == "text/html") {
     xml2::xml_text(httr2::resp_body_html(resp))
   } else {
-    "Unknown error response type"
+    stringr::str_glue("Body has unknown content type: {content_type}")
   }
 }
 
