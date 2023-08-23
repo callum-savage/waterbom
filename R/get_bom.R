@@ -55,11 +55,11 @@ get_bom_list <- function(request, returnfields = NULL, ...) {
   )
 }
 
-# TODO warn if zero rows returned for a given station
-# TODO keep empty rows when unnesting
+# TODO warn if zero rows returned for a given timeseries and no metadata provided
+# to distinguish between timeseries
 get_bom_timeseries <- function(request, returnfields = NULL, md_returnfields = NULL, ...) {
   resp <- get_bom_response(
-    format = "json",
+    format = "dajson", # data array json
     request = request,
     ...,
     returnfields = returnfields
@@ -72,10 +72,10 @@ get_bom_timeseries <- function(request, returnfields = NULL, md_returnfields = N
   # Select columns which will be returned
   # The timeseries is returned in a column called "data"
   ts3 <- dplyr::select(ts2, dplyr::any_of(c(md_returnfields, "data")))
-  # Unnest timeseries from "data" column
-  ts4 <- tidyr::unnest_longer(ts3, col = "data")
+  # Unpack each timestep into a row. Empty timeseries result in an empty row.
+  ts4 <- tidyr::unnest_longer(ts3, col = "data", keep_empty = TRUE)
+  # Expand each timestep into multiple columns
   ts5 <- tidyr::unnest_wider(ts4, col = "data", names_sep = "_")
-  # The timeseries' column names were returned as metadata
   # Extract the correct timeseries names
   ts_names <- unlist(stringr::str_split(ts2$columns[[1]], ","))
   # Identify the temporary timeseries names (of the form data_1, data_2, etc.)
@@ -169,10 +169,10 @@ convert_bom_types <- function(bom_data) {
 clean_bom_names <- function(bom_data) {
   name_lookup = c(
     # new = old
-    timestamp = "Timestamp",
-    value = "Value",
-    quality_code = "Quality Code",
-    interpolation_type = "Interpolation Type"
+    "timestamp"          = "Timestamp",
+    "value"              = "Value",
+    "quality_code"       = "Quality Code",
+    "interpolation_type" = "Interpolation Type"
   )
-  rename(bom_data, any_of(name_lookup))
+  dplyr::rename(bom_data, dplyr::any_of(name_lookup))
 }

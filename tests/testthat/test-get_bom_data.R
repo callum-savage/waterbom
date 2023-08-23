@@ -84,10 +84,10 @@ test_that("get_bom_data works for all supported request types", {
   expect_equal(dim(station_list), c(2, 5))
   expect_equal(dim(parameter_list), c(4, 6))
   expect_equal(dim(timeseries_list), c(100, 7))
-  expect_equal(dim(timeseries_values), c(2, 2))
+  expect_equal(dim(timeseries_values), c(3, 2))
 })
 
-test_that("getTimeseriesValues requests 0-length results explicitly", {
+test_that("getTimeseriesValues returns 0-length results explicitly", {
 
 })
 
