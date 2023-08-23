@@ -63,6 +63,7 @@ There are two additional functions which may also be useful in some cases:
     -   [ ] Write a vignette demonstrating typical usage
     -   [ ] Always point inhereted documentation at get_bom_data rather than get_station_list, if possible
 -   [ ] Testing
+    -   [ ] Save test data locally
 -   [ ] Match the WDO interface
     -   [ ] Only return active stations, or similar, by default
 -   [ ] Possible enhancements
