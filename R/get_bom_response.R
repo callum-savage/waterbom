@@ -29,20 +29,23 @@
 #'   parametertype_name = "Water Course Discharge"
 #' )
 get_bom_response <- function(format, request, ...) {
-  bom_url <- "http://www.bom.gov.au/waterdata/services"
-  query <- list(
+  # Create a request object
+  req <- httr2::request("http://www.bom.gov.au/waterdata/services")
+  # Append base query fields to the request
+  query_base <- list(
     service = "kisters",
     type = "QueryServices",
     format = format,
     request = request
   )
-  # Collapse additional args into a comma separated list
-  # TODO remove duplicates from query fields
-  query_fields <- purrr::map(list(...), stringr::str_flatten_comma)
-  req <- httr2::request(bom_url)
-  req <- httr2::req_url_query(req, !!!c(query, query_fields))
-  # Check for errors in the response body
+  req <- httr2::req_url_query(req, !!!query_base)
+  # Append any additional query fields to the request
+  # Any vector arguments must first be concatenated into a single string
+  query <- purrr::map(list(...), stringr::str_flatten_comma)
+  req <- httr2::req_url_query(req, !!!query)
+  # Provide a function to check for errors in the response body
   req <- httr2::req_error(req, body = extract_body_error)
+  # Get response
   httr2::req_perform(req)
 }
 
