@@ -42,6 +42,7 @@ There are two additional functions which may also be useful in some cases:
     -   [ ] Limit query scope to useful fields
     -   [ ] Make get_timeseries_values use get_bom_data
     -   [ ] Combine md_return_fields with returnfields to simplify interface
+    -   [ ] Cache results, with a daily (?) expiration + the ability to turn off this behaviour
 -   [ ] Error checking
     -   [ ] Unify type conversions into a single function
     -   [ ] Consolidate error checks into a single function
@@ -77,3 +78,7 @@ There are two additional functions which may also be useful in some cases:
         -   e.g. The response from `get_station_info`
     -   [ ] Tidy up function args to be snake_case, even when API differs
 -   [ ] Submit to CRAN
+    -   [ ] Ensure package import minimal versions are sensible (currently using latest version)
+    -   [ ] Polish all errors and warnings
+    -   [ ] Ensure documentation formatting follows good practice conventions
+    -   [ ] Test that the API hasn't changed
