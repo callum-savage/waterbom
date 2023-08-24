@@ -1,113 +1,6 @@
 # TODO: Make tibble references a link
 # TODO: Add details on which requests are supported
 
-#' Download data from Water Data Online
-#'
-#' @param request A character string defining the request type.
-#' @param returnfields Optionally, a character vector of columns to include in
-#'   the returned `tibble`. If not defined, the API will provide a sensible
-#'   default. Use [list_return_fields()] to see available options.
-#' @param ... Additional named query parameters which are passed on to the API.
-#'   Vectors of length greater than one will be collapsed into comma separated
-#'   character strings. Use [list_query_fields()] to see available options.
-#' @return A `tibble` containing the returned data.
-#' @seealso [get_bom_response()] to get the unmodified API response.
-#' @examples
-#' get_bom_data(
-#'   request = "getStationList",
-#'   parametertype_name = "Water Course Level"
-#' )
-#' @export
-get_bom_data <- function(request, returnfields = NULL, ...) {
-  # List and timeseries requests need to be unpacked differently
-  # TODO use list_requests(supported = TRUE) or similar instead
-  list_requests <- c("getStationList", "getParameterList", "getTimeseriesList")
-  timeseries_requests <- c("getTimeseriesValues")
-  if (request %in% list_requests) {
-    bom_data <- get_bom_list(request = request, ...)
-  } else if (request %in% timeseries_requests) {
-    bom_data <- get_bom_timeseries(...)
-  } else {
-    # TODO polish this error message
-    cli::cli_abort(c("Invalid request: {request}"))
-  }
-  # Tidy up and return data
-  bom_data <- convert_bom_types(bom_data)
-  bom_data <- clean_bom_names(bom_data)
-  bom_data
-}
-
-#' Title
-#'
-#' @param request
-#' @param returnfields
-#' @param ...
-#'
-#' @return
-#'
-#' @noRd
-get_bom_list <- function(request, returnfields = NULL, ...) {
-  # Get response in csv format
-  resp <- get_bom_response(
-    format = "csv",
-    request = request,
-    returnfields = returnfields,
-    ...
-  )
-  # Read csv from response body
-  resp_body <- httr2::resp_body_string(resp)
-  readr::read_delim(
-    resp_body,
-    delim = ";",
-    col_types = readr::cols(.default = readr::col_character()),
-    na = "",
-    progress = FALSE
-  )
-}
-
-# TODO warn if zero rows returned for a given timeseries and no metadata
-# provided to distinguish between timeseries
-
-#' Download a timeseries from Water Data Online
-#'
-#' This function makes a 'getTimeseriesValues' request and unpacks the response
-#' into a tibble.
-#'
-#' @param returnfields
-#' @param md_returnfields
-#' @param ...
-#'
-#' @return A tibble containing the one or more timeseries.
-#'
-#' @noRd
-get_bom_timeseries <- function(ts_id, returnfields = NULL, md_returnfields = NULL, ...) {
-  resp <- get_bom_response(
-    format = "dajson", # data array json
-    request = "getTimeseriesValues",
-    ...,
-    returnfields = returnfields
-  )
-  resp_body <- httr2::resp_body_json(resp)
-  # Unpack json response into a nested tibble with one row per timeseries
-  ts1 <- tibble::tibble("resp_body" = resp_body)
-  # Expand resp_body into columns (timeseries is still nested)
-  ts2 <- tidyr::unnest_wider(ts1, col = "resp_body")
-  # Select columns which will be returned
-  # The timeseries is returned in a column called "data"
-  ts3 <- dplyr::select(ts2, dplyr::any_of(c(md_returnfields, "data")))
-  # Unpack each timestep into a row. Empty timeseries result in an empty row.
-  ts4 <- tidyr::unnest_longer(ts3, col = "data", keep_empty = TRUE)
-  # Expand each timestep into multiple columns
-  ts5 <- tidyr::unnest_wider(ts4, col = "data", names_sep = "_")
-  # Extract the correct timeseries names
-  newnames <- unlist(stringr::str_split(ts2$columns[[1]], ","))
-  # Identify the temporary timeseries names (of the form data_1, data_2, etc.)
-  oldnames <- stringr::str_subset(names(ts5), "^data_\\d+$")
-  # Replace old names with the new
-  # TODO check that length(newnames) == length(oldnames)
-  dplyr::rename_with(ts5, .fn = \(x) newnames, .cols = dplyr::all_of(oldnames))
-}
-
 #' Get a response from the BOM API
 #'
 #' `get_bom_response()` takes an arbitrary API request and returns the response
@@ -176,6 +69,112 @@ extract_body_error <- function(resp) {
     stringr::str_glue("Body has unknown content type: {content_type}")
   }
 }
+
+#' Download a list table from Water Data Online
+#'
+#' @param request
+#' @param returnfields
+#' @param ...
+#' @return A tibble containing the list data. Columns match `returnfields`.
+#'
+#' @noRd
+get_bom_list <- function(request, returnfields = NULL, ...) {
+  # Get response in csv format
+  resp <- get_bom_response(
+    format = "csv",
+    request = request,
+    returnfields = returnfields,
+    ...
+  )
+  # Read csv from response body
+  resp_body <- httr2::resp_body_string(resp)
+  readr::read_delim(
+    resp_body,
+    delim = ";",
+    col_types = readr::cols(.default = readr::col_character()),
+    na = "",
+    progress = FALSE
+  )
+}
+
+# TODO warn if zero rows returned for a given timeseries and no metadata
+# provided to distinguish between timeseries
+
+#' Download a timeseries from Water Data Online
+#'
+#' This function makes a 'getTimeseriesValues' request and unpacks the response
+#' into a tibble.
+#'
+#' @noRd
+get_bom_timeseries <- function(ts_id, returnfields = NULL, md_returnfields = NULL, ...) {
+  resp <- get_bom_response(
+    format = "dajson", # data array json
+    request = "getTimeseriesValues",
+    ...,
+    returnfields = returnfields
+  )
+  resp_body <- httr2::resp_body_json(resp)
+  # Unpack json response into a nested tibble with one row per timeseries
+  ts1 <- tibble::tibble("resp_body" = resp_body)
+  # Expand resp_body into columns (timeseries is still nested)
+  ts2 <- tidyr::unnest_wider(ts1, col = "resp_body")
+  # Select columns which will be returned
+  # The timeseries is returned in a column called "data"
+  ts3 <- dplyr::select(ts2, dplyr::any_of(c(md_returnfields, "data")))
+  # Unpack each timestep into a row. Empty timeseries result in an empty row.
+  ts4 <- tidyr::unnest_longer(ts3, col = "data", keep_empty = TRUE)
+  # Expand each timestep into multiple columns
+  ts5 <- tidyr::unnest_wider(ts4, col = "data", names_sep = "_")
+  # Extract the correct timeseries names
+  newnames <- unlist(stringr::str_split(ts2$columns[[1]], ","))
+  # Identify the temporary timeseries names (of the form data_1, data_2, etc.)
+  oldnames <- stringr::str_subset(names(ts5), "^data_\\d+$")
+  # Replace old names with the new
+  # TODO check that length(newnames) == length(oldnames)
+  dplyr::rename_with(ts5, .fn = \(x) newnames, .cols = dplyr::all_of(oldnames))
+}
+
+#' Download data from Water Data Online
+#'
+#' @param request A character string defining the request type.
+#' @param returnfields Optionally, a character vector of columns to include in
+#'   the returned `tibble`. If not defined, the API will provide a sensible
+#'   default. Use [list_return_fields()] to see available options.
+#' @param ... Additional named query parameters which are passed on to the API.
+#'   Vectors of length greater than one will be collapsed into comma separated
+#'   character strings. Use [list_query_fields()] to see available options.
+#' @return A `tibble` containing the returned data.
+#' @seealso [get_bom_response()] to get the unmodified API response.
+#' @examples
+#' get_bom_data(
+#'   request = "getStationList",
+#'   parametertype_name = "Water Course Level"
+#' )
+#' @export
+get_bom_data <- function(request, returnfields = NULL, ...) {
+  # List and timeseries requests need to be unpacked differently
+  # TODO use list_requests(supported = TRUE) or similar instead
+  list_requests <- c("getStationList", "getParameterList", "getTimeseriesList")
+  timeseries_requests <- c("getTimeseriesValues")
+  if (request %in% list_requests) {
+    bom_data <- get_bom_list(request = request, ...)
+  } else if (request %in% timeseries_requests) {
+    bom_data <- get_bom_timeseries(...)
+  } else {
+    # TODO polish this error message
+    cli::cli_abort(c("Invalid request: {request}"))
+  }
+  # Tidy up and return data
+  bom_data <- convert_bom_types(bom_data)
+  bom_data <- clean_bom_names(bom_data)
+  bom_data
+}
+
+
+
+
+
+
 
 #' Convert types of returned data
 #'
