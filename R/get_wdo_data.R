@@ -1,4 +1,4 @@
-############ file: get_wdo_response.R
+############ file: core.R
 
 # Get a response object from Water Data Online API
 #
@@ -28,11 +28,13 @@ extract_body_error <- function() {
   body_error
 }
 
+
+
+########### file: wrappers
+
 convert_wdo_types <- function(wdo_data) {
   wdo_data # with type conversions
 }
-
-########### file: wdo_list_requests.R
 
 # Power list requests
 # Not user facing
@@ -44,9 +46,12 @@ get_wdo_list <- function(request, ..., return_fields = NULL) {
 }
 
 # User facing wrappers
+# Args not limited
 get_station_list <- function() {
   get_wdo_list(request = "getStationList")
 }
+
+# Do I actually need this function?
 get_parameter_list() <- function() {
   get_wdo_list(request = "getParameterList")
 }
@@ -54,9 +59,8 @@ get_timeseries_list() <- function() {
   get_wdo_list(request = "getTimeseriesList")
 }
 
-# find_stations(station_no, station_name, bbox)
-
-########### file: wdo_timeseries_requests.R
+# A future function with limited capabilities but a nice interface might be:
+# find_stations(station_no, station_name, bbox, return_fields)
 
 get_timeseries_values <- function(ts_id, ..., return_fields = NULL) {
   wdo_ts_resp <- get_wdo_response(
@@ -78,7 +82,7 @@ get_timeseries <- function(station_no, ts_name, from, to, timezone, return_field
 
 # get_water_data(station_no = 1234, parameter = "discharge", start_date, end_date, return_fields)
 
-########### file: get_capabilities.R?
+########### file: helpers.R
 
 parameters()
 query_fields()
