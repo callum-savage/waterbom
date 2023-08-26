@@ -13,8 +13,7 @@ get_wdo_response <- function(format, request, ...) {
 }
 
 construct_wdo_query <- function(format, request, ...) {
-  # Pack dots into a list
-  # TODO check if there's any problems if format or request are repeated in dots
+  # Package dots into a list
   dot_options <- rlang::dots_list(
       ...,
       .ignore_empty = "trailing", # allow a trailing comma
