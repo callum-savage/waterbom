@@ -14,19 +14,20 @@ get_wdo_response <- function(format, request, ...) {
 
 construct_wdo_query <- function(format, request, ...) {
   # Package dots into a list
-  dot_options <- rlang::dots_list(
+  dots <- rlang::dots_list(
       ...,
       .ignore_empty = "trailing", # allow a trailing comma
       .homonyms = "error", # error if two args have the same name
       .check_assign = TRUE # warn if `<-` used in function call
     )
 
-  # TODO error if any dots args are unnamed
-  # I'm pretty sure they would break the query if left in
-  # rlang::is_named() (TRUE for empty list, which is what I want)
-
-  # Concatenate any vector options into comma separated strings
-  dot_options <- purrr::map(dot_options, stringr::str_flatten_comma)
+  # Check that all args have names
+  if (any(rlang::names2(dots) == "")) {
+    rlang::abort(
+      "All query options must be named.",
+      class = "unnamed_query_options"
+    )
+  }
 
   # Assemble all query options into a list
   wdo_query <- rlang::list2(
@@ -34,11 +35,18 @@ construct_wdo_query <- function(format, request, ...) {
     type = "QueryServices",
     format = format,
     request = request,
-    !!!dot_options
+    !!!dots
   )
 
-  # TODO check that everything is a character
-  # i.e. format and request
+  # Convert everything to character
+  wdo_query <- purrr::map(wdo_query, as.character)
+
+  # Remove any duplicate options
+  # TODO check if this is actually necessary
+  wdo_query <- purrr::map(wdo_query, unique)
+
+  # Concatenate any vector options into comma separated strings
+  wdo_query <- purrr::map(wdo_query, stringr::str_flatten, collapse = ",")
 
   wdo_query
 }
