@@ -36,13 +36,21 @@ test_that("concatenation keeps all **unique** values", {
   expect_equal(q$b, "1,2,3")
 })
 
-test_that("request info hasn't changed", {
-
-})
-
 test_that("responses are returned in the expected format", {
-  # incl. json, objson etc.
-  # Cover all formats, not just supported
+  # should use httr2 content type
+  # station_request <- function(format) {
+  #   r = get_wdo_response(format, "getStationList", station_no = 402329)
+  #   r$headers$`Content-Type`
+  # }
+  #
+  # list_formats <- c("lpk", "geojson", "tabjson", "objson", "ascii", "csv",
+  #                   "html", "xlsx", "kml", "json")
+  #
+  # list_responses <- purrr::map(list_formats, station_request)
+
+  # ts_formats <- c("dajson", "wml2", "zrxp", "esrijson")
+  # img_formats <- c("jpg", "png")
+  # web_formats <- "json"
 })
 
 test_that("all request types are supported", {
@@ -51,4 +59,8 @@ test_that("all request types are supported", {
 
 test_that("error messages are identical across all formats", {
   # Try and raise the same error in xml, json, csv, etc.
+})
+
+test_that("query order doesn't matter", {
+  # Test that providing args in a different order creates the same url
 })
