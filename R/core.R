@@ -38,14 +38,15 @@ construct_wdo_query <- function(format, request, ...) {
     !!!dots
   )
 
-  # Convert everything to character
-  wdo_query <- purrr::map(wdo_query, as.character)
+  # Remove white space, including internally repeated spaces
+  # Also coerces everything to a character vector
+  wdo_query <- purrr::map(wdo_query, stringr::str_squish)
 
   # Remove any duplicate options
   # TODO check if this is actually necessary
   wdo_query <- purrr::map(wdo_query, unique)
 
-  # Concatenate any vector options into comma separated strings
+  # Concatenate any vectors with length > 1 into comma separated strings
   wdo_query <- purrr::map(wdo_query, stringr::str_flatten, collapse = ",")
 
   wdo_query

@@ -1,3 +1,6 @@
+# TODO test if having white space around args causes issues
+# Particularly with staiton no./name etc.
+
 test_that("query options are converted to a named list", {
   q <- construct_wdo_query("f", "r", a = "x")
   expect_true(is.list(q)) # q is a list
@@ -20,7 +23,32 @@ test_that("repeated query options raise an error", {
   expect_error(construct_wdo_query("f", "r", a = "x", a = "y"))
 })
 
+test_that("white space is removed from query options", {
+  q <- construct_wdo_query("f ", " r ", a = c("x x", "y  y", " z "))
+  expect_equal(q$format, "f")
+  expect_equal(q$request, "r")
+  expect_equal(q$a, "x x,y y,z")
+})
+
 test_that("concatenation keeps all **unique** values", {
-  q <- construct_wdo_query("f", "r", x = c(1, 2, 3, 2, 4))
-  expect_equal(q$x, "1,2,3,4")
+  q <- construct_wdo_query("f", "r", a = c("x", " x", "xy", "y"), b = c(1, 2, 3, 2))
+  expect_equal(q$a, "x,xy,y")
+  expect_equal(q$b, "1,2,3")
+})
+
+test_that("request info hasn't changed", {
+
+})
+
+test_that("responses are returned in the expected format", {
+  # incl. json, objson etc.
+  # Cover all formats, not just supported
+})
+
+test_that("all request types are supported", {
+  # Minimal requests for all types, not just supported
+})
+
+test_that("error messages are identical across all formats", {
+  # Try and raise the same error in xml, json, csv, etc.
 })
