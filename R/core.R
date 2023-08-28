@@ -15,11 +15,11 @@ get_wdo_response <- function(format, request, ...) {
 construct_wdo_query <- function(format, request, ...) {
   # Package dots into a list
   dots <- rlang::dots_list(
-      ...,
-      .ignore_empty = "trailing", # allow a trailing comma
-      .homonyms = "error", # error if two args have the same name
-      .check_assign = TRUE # warn if `<-` used in function call
-    )
+    ...,
+    .ignore_empty = "trailing", # allow a trailing comma
+    .homonyms = "error", # error if two args have the same name
+    .check_assign = TRUE # warn if `<-` used in function call
+  )
 
   # Check that all args have names
   if (any(rlang::names2(dots) == "")) {
