@@ -37,18 +37,40 @@ test_that("concatenation keeps all **unique** values", {
 })
 
 test_that("responses are returned in the expected format", {
-  # should use httr2 content type
-  # station_request <- function(format) {
+
+  # TODO rewrite this using user-facing helper functions
+  # i.e. add content type to list_formats() or similar
+
+  # Define a helper for making a station list request
+  # st_type <- function(format) {
   #   r = get_wdo_response(format, "getStationList", station_no = 402329)
-  #   r$headers$`Content-Type`
+  #   httr2::resp_content_type(r)
   # }
   #
-  # list_formats <- c("lpk", "geojson", "tabjson", "objson", "ascii", "csv",
-  #                   "html", "xlsx", "kml", "json")
+  # expect_equal(st_type("ascii"),   "text/plain")
+  # expect_equal(st_type("html"),    "text/html")
+  # expect_equal(st_type("csv"),     "application/csv")
+  # expect_equal(st_type("json"),    "application/json")
+  # expect_equal(st_type("geojson"), "application/json")
+  # expect_equal(st_type("tabjson"), "application/json")
+  # expect_equal(st_type("objson"),  "application/json")
+  # expect_equal(st_type("lpk"),     "application/lpk")
+  # expect_equal(st_type("xlsx"),    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+  # expect_equal(st_type("kml"),     "application/vnd.google-earth.kml+xml")
   #
-  # list_responses <- purrr::map(list_formats, station_request)
+  # # Define a helper for making a timeseries request
+  #
+  # ts_type <- function(format) {
+  #   r = get_wdo_response(format, "getTimeseriesValues", ts_id = 254923010)
+  #   httr2::resp_content_type(r)
+  # }
+  #
+  # expect_equal(ts_type("dajson"), "application/json")
+  # expect_equal(ts_type("esrijson"), "application/json")
+  # expect_equal(ts_type("wml2"), "text/xml")
+  # expect_equal(ts_type("zrxp"), "text/plain")
 
-  # ts_formats <- c("dajson", "wml2", "zrxp", "esrijson")
+  # Other formats
   # img_formats <- c("jpg", "png")
   # web_formats <- "json"
 })

@@ -64,8 +64,6 @@ construct_wdo_req <- function(wdo_query) {
   # httr2 doesn't pick up on these messages by default
   wdo_req <- httr2::req_error(wdo_req, body = extract_body_error)
 
-  # TODO consider adding in a 'times' argument to make repeated requests
-
   # Return the request object
   wdo_req
 }
