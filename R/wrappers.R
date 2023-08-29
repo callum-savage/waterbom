@@ -25,7 +25,7 @@ unpack_ts <- function(ts_json, md_returnfields) {
 
   # Convert the timeseries json into a tibble
   ts_rows <- tibble::tibble("ts_col" = ts_json$data)
-  ts <- tidyr::unnest_wider(ts_rows, ts_col, names_sep = "_")
+  ts <- tidyr::unnest_wider(ts_rows, "ts_col", names_sep = "_")
 
   # Apply the correct column names to the timeseries
   names(ts) <- ts_colnames
