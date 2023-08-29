@@ -1,6 +1,3 @@
-# TODO test if having white space around args causes issues
-# Particularly with staiton no./name etc.
-
 test_that("query options are converted to a named list", {
   q <- construct_wdo_query("f", "r", a = "x")
   expect_true(is.list(q)) # q is a list
@@ -86,3 +83,21 @@ test_that("error messages are identical across all formats", {
 test_that("query order doesn't matter", {
   # Test that providing args in a different order creates the same url
 })
+
+test_that("invalid formats raise an error", {
+  # e.g. format = fakeformat
+  # And formats which don't match the request
+  # Check empty format "" too
+})
+
+test_that("invalid requests raise an error", {
+  # request = fakerequest
+  # Check empty request "" too
+})
+
+test_that("invalid query options raise an error", {
+  # fakeoption = 1
+  # I don't actually think this will, or should, raise an error
+  # Also check query options which are not valid for the request
+})
+

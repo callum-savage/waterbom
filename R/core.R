@@ -8,7 +8,6 @@ get_wdo_response <- function(format, request, ...) {
   # Get a response from Water Data Online
   wdo_resp <- httr2::req_perform(wdo_req)
 
-  # Return the response object
   wdo_resp
 }
 
@@ -38,12 +37,20 @@ construct_wdo_query <- function(format, request, ...) {
     !!!dots
   )
 
+  # TODO consider removing this whole section as it's probably overkill
+  # The API probably does a lot of this for us
+  # It may also introduce additional errors
+
   # Remove white space, including internally repeated spaces
   # Also coerces everything to a character vector
+  # TODO test if white space actually matters (especially for text fields like
+  # staiton name)
   wdo_query <- purrr::map(wdo_query, stringr::str_squish)
 
   # Remove any duplicate options
   # TODO check if this is actually necessary
+  # TODO I don't think the API is case sensitive, so convert all names to the
+  # same case before testing uniqueness
   wdo_query <- purrr::map(wdo_query, unique)
 
   # Concatenate any vectors with length > 1 into comma separated strings
@@ -70,10 +77,10 @@ construct_wdo_req <- function(wdo_query) {
 
 extract_body_error <- function(wdo_resp) {
   # Identify the format of the response
-  # (json, xml, or html)
   format <- httr2::resp_content_type(wdo_resp)
 
   # Extract any messages found in the response body
+  # TODO test that this actually covers all error return types
   if (format == "application/json") {
     body_error <- httr2::resp_body_json(wdo_resp)$message
   } else if (format == "text/xml") {
@@ -81,10 +88,9 @@ extract_body_error <- function(wdo_resp) {
   } else if (format == "text/html") {
     body_error <- xml2::xml_text(httr2::resp_body_html(wdo_resp))
   } else {
-    # TODO make this error message more informative
+    # TODO add a class to this error and find a way to test it
     body_error <- stringr::str_glue("Unexpected error format: {content_type}")
   }
 
-  # Return the error message (a string)
   body_error
 }
