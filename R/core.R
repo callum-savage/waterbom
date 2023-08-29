@@ -1,14 +1,14 @@
 get_wdo_response <- function(format, request, ...) {
-  # Pack all query options into a list
+  # TODO provide an option to return the request
+
+  # Pack all query options into a list, with error checking
   wdo_query <- construct_wdo_query(format, request, ...)
 
-  # Turn query list into a httr2 request object
+  # Use query options to construct a httr2 request object
   wdo_req <- construct_wdo_req(wdo_query)
 
   # Get a response from Water Data Online
-  wdo_resp <- httr2::req_perform(wdo_req)
-
-  wdo_resp
+  httr2::req_perform(wdo_req)
 }
 
 construct_wdo_query <- function(format, request, ...) {
@@ -21,6 +21,7 @@ construct_wdo_query <- function(format, request, ...) {
   )
 
   # Check that all args have names
+  # note: rlang::names2 converts missing names to ""
   if (any(rlang::names2(dots) == "")) {
     rlang::abort(
       "All query options must be named.",
@@ -41,10 +42,9 @@ construct_wdo_query <- function(format, request, ...) {
   # The API probably does a lot of this for us
   # It may also introduce additional errors
 
-  # Remove white space, including internally repeated spaces
-  # Also coerces everything to a character vector
-  # TODO test if white space actually matters (especially for text fields like
-  # staiton name)
+  # Coerce all options to characters and remove any extra white space
+  # TODO test if white space actually matters to the API
+  # (especially for text fields like staiton name)
   wdo_query <- purrr::map(wdo_query, stringr::str_squish)
 
   # Remove any duplicate options
@@ -53,10 +53,8 @@ construct_wdo_query <- function(format, request, ...) {
   # same case before testing uniqueness
   wdo_query <- purrr::map(wdo_query, unique)
 
-  # Concatenate any vectors with length > 1 into comma separated strings
-  wdo_query <- purrr::map(wdo_query, stringr::str_flatten, collapse = ",")
-
-  wdo_query
+  # Concatenate any options with length > 1 into comma separated strings
+  purrr::map(wdo_query, stringr::str_flatten, collapse = ",")
 }
 
 construct_wdo_req <- function(wdo_query) {
@@ -67,19 +65,16 @@ construct_wdo_req <- function(wdo_query) {
   # Append query options
   wdo_req <- httr2::req_url_query(wdo_req, !!!wdo_query)
 
-  # Provide a function to check for error messages in the response body
-  # httr2 doesn't pick up on these messages by default
-  wdo_req <- httr2::req_error(wdo_req, body = extract_body_error)
-
-  # Return the request object
-  wdo_req
+  # In case of an error, check for a message in the response body
+  httr2::req_error(wdo_req, body = extract_body_error)
 }
 
 extract_body_error <- function(wdo_resp) {
-  # Identify the format of the response
+  # Get the format of the error response
+  # Note: this doesn't necessarily match format specified in the request
   format <- httr2::resp_content_type(wdo_resp)
 
-  # Extract any messages found in the response body
+  # Extract any messages found in the error response body
   # TODO test that this actually covers all error return types
   if (format == "application/json") {
     body_error <- httr2::resp_body_json(wdo_resp)$message
