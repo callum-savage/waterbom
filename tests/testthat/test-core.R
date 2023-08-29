@@ -100,4 +100,3 @@ test_that("invalid query options raise an error", {
   # I don't actually think this will, or should, raise an error
   # Also check query options which are not valid for the request
 })
-
