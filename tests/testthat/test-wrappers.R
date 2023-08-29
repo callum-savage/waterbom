@@ -1,16 +1,27 @@
 test_that("list responses are always returned as a tibble", {
-  # TODO also check empty tibble
 
   df <- get_wdo_list(
     request = "getStationList",
     station_no = c("00018", "00184")
   )
+
+  # Same request but with parametertype specified
+  # These are rainfall only stations, so there are no results
+  df_empty <- get_wdo_list(
+    request = "getStationList",
+    station_no = c("00018", "00184"),
+    parametertype_name = "Water Course Discharge"
+  )
+
   expect_true(tibble::is_tibble(df))
+  expect_true(tibble::is_tibble(df_empty))
   expect_equal(dim(df), c(2, 5))
+  expect_equal(dim(df_empty), c(0, 5))
+  expect_equal(names(df), names(df_empty))
 })
 
 test_that("get_wdo_list only accepts list requests", {
-  # i.e. not getTimeseriesValues etc.
+  # TODO i.e not getTimeseriesValues etc.
 })
 
 test_that("column type conversions are applied", {
@@ -19,7 +30,7 @@ test_that("column type conversions are applied", {
   # TODO check that everything else is a character
 
   df <- get_wdo_list(
-    request = "getParameterList",
+    request = "getStationList",
     station_no = c("00018", "00184")
   )
 
@@ -50,32 +61,40 @@ test_that("the return fields are idential for all timeseries", {
 })
 
 test_that("metadata is identical for all timeseries", {
-
+  # TODO
+  # i.e. when different timeseries might have different timeseries,
+  # or not have a value for some options
 })
 
 test_that("null values are converted to NAs in timeseries", {
+  # TODO
   # This has introduced errors before
 })
 
 test_that("A tibble is returned even when metadata isn't specified", {
+  # TODO
   # Include invalid metadata
 })
 
 test_that("empty timeseries metadata is maintained in timeseries tibble", {
+  # TODO
   # i.e. check that there is a row with no timeseries attached
   # And when no timeseries is returned at all
 })
 
 test_that("returnfields always match the returned columns for list requests", {
+  # TODO
   # Try and trick it with custom attributes etc.
 })
 
 test_that("returnfields always match the returned columns for timeseries requests", {
+  # TODO
   # Try and trick it with custom attributes etc.
   # Make sure there are explicit NA columns when nothing is returned for
   # custom attributes
 })
 
 test_that("A warning is raised when there is no metadata key for the timeseries", {
-
+  # TODO
+  # Could use janitor check row key tool, or just specify specific metadata options
 })

@@ -33,8 +33,24 @@ test_that("concatenation keeps all **unique** values", {
   expect_equal(q$b, "1,2,3")
 })
 
+test_that("query options can be passed as a named list", {
+  # TODO I want to be able specify all arguments in a list
+  # This should work for all 'get' functions, including wrappers etc.
+  q <- list(format = "csv",
+            request = "getStationList",
+            station_no = c("00018", "00184"))
+  expect_no_error(get_wdo_list(!!!q))
+})
+
 test_that("A url is returned if requested", {
-  # check that this also works for list,ts etc.
+  # TODO check that this also works for list,ts etc.
+  wdo_url <- get_wdo_response(
+    format = "html",
+    request = "getStationList",
+    .return_url = TRUE)
+
+  expect_type(wdo_url, "character")
+  expect_match(wdo_url, "http://.*service=kisters")
 })
 
 test_that("responses are returned in the expected format", {
@@ -77,30 +93,42 @@ test_that("responses are returned in the expected format", {
 })
 
 test_that("all request types are supported", {
+  # TODO
   # Minimal requests for all types, not just supported
 })
 
 test_that("error messages are identical across all formats", {
+  # TODO
   # Try and raise the same error in xml, json, csv, etc.
 })
 
 test_that("query order doesn't matter", {
+  # TODO
   # Test that providing args in a different order creates the same url
 })
 
 test_that("invalid formats raise an error", {
+  # TODO
   # e.g. format = fakeformat
   # And formats which don't match the request
   # Check empty format "" too
 })
 
 test_that("invalid requests raise an error", {
+  # TODO
   # request = fakerequest
   # Check empty request "" too
 })
 
 test_that("invalid query options raise an error", {
+  # TODO
   # fakeoption = 1
   # I don't actually think this will, or should, raise an error
   # Also check query options which are not valid for the request
+})
+
+test_that("request info hasn't changed", {
+  request_info_resp <- get_wdo_response(format = "json", request = "getRequestInfo")
+  request_info <- httr2::resp_body_json(request_info_resp)
+  expect_snapshot(request_info)
 })
