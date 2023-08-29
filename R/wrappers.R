@@ -1,5 +1,6 @@
 convert_wdo_types <- function(wdo_data) {
   # TODO test that this converts datetimes correctly
+  # (espec. for timezones)
 
   # Specify columns to be converted
   numeric_cols <- c("station_latitude", "station_longitude")
@@ -14,7 +15,6 @@ convert_wdo_types <- function(wdo_data) {
     dplyr::across(dplyr::any_of(timestamp_cols), lubridate::as_datetime)
   )
 }
-
 
 unpack_ts <- function(ts_json, md_returnfields) {
   # Identify metadata values
@@ -33,7 +33,6 @@ unpack_ts <- function(ts_json, md_returnfields) {
   # Return the timeseries, with metadata columns as a key
   tibble::tibble(!!!ts_metadata, ts)
 }
-
 
 get_timeseries_values <- function(ts_id,
                                   ...,
@@ -68,8 +67,8 @@ get_timeseries_values <- function(ts_id,
 }
 
 get_wdo_list <- function(request, ..., returnfields = NULL) {
-  # TODO check that request is a list request
-  # probably just with a regex
+  # TODO check that request is a list request using rlang::arg_match
+  # https://design.tidyverse.org/enumerate-options.html
 
   # Get response in csv format
   wdo_list_resp <- get_wdo_response(format = "csv",

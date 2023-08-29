@@ -33,6 +33,10 @@ test_that("concatenation keeps all **unique** values", {
   expect_equal(q$b, "1,2,3")
 })
 
+test_that("A url is returned if requested", {
+  # check that this also works for list,ts etc.
+})
+
 test_that("responses are returned in the expected format", {
 
   # TODO rewrite this using user-facing helper functions

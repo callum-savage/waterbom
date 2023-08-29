@@ -1,11 +1,12 @@
-get_wdo_response <- function(format, request, ...) {
-  # TODO provide an option to return the request
-
+get_wdo_response <- function(format, request, ..., .return_url = FALSE) {
   # Pack all query options into a list, with error checking
   wdo_query <- construct_wdo_query(format, request, ...)
 
   # Use query options to construct a httr2 request object
   wdo_req <- construct_wdo_req(wdo_query)
+
+  # Return the url string if .return_url == TRUE
+  if (.return_url) return(wdo_req$url)
 
   # Get a response from Water Data Online
   httr2::req_perform(wdo_req)
