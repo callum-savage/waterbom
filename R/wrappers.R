@@ -1,4 +1,6 @@
 convert_wdo_types <- function(wdo_data) {
+  # TODO test that this converts datetimes correctly
+
   # Specify columns to be converted
   numeric_cols <- c("station_latitude", "station_longitude")
   integer_cols <- c("station_id")
@@ -13,6 +15,26 @@ convert_wdo_types <- function(wdo_data) {
   )
 }
 
+
+unpack_ts <- function(ts_json, md_returnfields) {
+  # Identify metadata values
+  ts_metadata <- ts_json[md_returnfields]
+
+  # Identify column names of the returned timeseries
+  ts_colnames <- stringr::str_split_1(ts_json$columns, ",")
+
+  # Convert the timeseries json into a tibble
+  ts_rows <- tibble::tibble("ts_col" = ts_json$data)
+  ts <- tidyr::unnest_wider(ts_rows, ts_col, names_sep = "_")
+
+  # Apply the correct column names to the timeseries
+  names(ts) <- ts_colnames
+
+  # Return the timeseries, with metadata columns as a key
+  tibble::tibble(!!!ts_metadata, ts)
+}
+
+
 get_timeseries_values <- function(ts_id,
                                   ...,
                                   from = NULL,
@@ -21,7 +43,7 @@ get_timeseries_values <- function(ts_id,
                                   md_returnfields = c("ts_id", "station_no"),
                                   returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")) {
   ts_resp <- get_wdo_response(
-    format = "dajson",
+    format = "dajson", # data array json
     request = "getTimeseriesValues",
     ts_id = ts_id,
     from = from,
@@ -32,39 +54,17 @@ get_timeseries_values <- function(ts_id,
     returnfields = returnfields,
     ...
   )
+  # TODO consider allowing the return of a nested tibble
+  ts_resp_body <- httr2::resp_body_json(ts_resp)
 
-  ts_body <- httr2::resp_body_json(ts_resp)
+  # Unpack each timeseries separately into a list of tibbles
+  ts_list <- purrr::map(ts_resp_body, unpack_ts, md_returnfields)
 
-  # TODO move unpacking to its own function
-  # TODO move column renaming to its own function
-
-  # Unpack json response into a nested tibble with one row per timeseries
-  ts1 <- tibble::tibble("ts_body" = ts_body)
-
-  # Expand ts_body into columns (timeseries is still nested)
-  ts2 <- tidyr::unnest_wider(ts1, col = "ts_body")
-
-  # Select columns which will be returned
-  # The timeseries is returned in a column called "data"
-  ts3 <- dplyr::select(ts2, dplyr::any_of(c(md_returnfields, "data")))
-
-  # Unpack each timestep into a row. Empty timeseries result in an empty row.
-  ts4 <- tidyr::unnest_longer(ts3, col = "data", keep_empty = TRUE)
-
-  # Expand each timestep into multiple columns
-  ts5 <- tidyr::unnest_wider(ts4, col = "data", names_sep = "_")
-
-  # Extract the correct timeseries names
-  newnames <- unlist(stringr::str_split(ts2$columns[[1]], ","))
-
-  # Identify the temporary timeseries names (of the form data_1, data_2, etc.)
-  oldnames <- stringr::str_subset(names(ts5), "^data_\\d+$")
-
-  # Replace old names with the new
-  names(ts5[oldnames]) <- newnames
+  # Combine all timeseries into a single tibble
+  ts <- purrr::list_rbind(ts_list)
 
   # Apply type conversions
-  convert_wdo_types(ts5)
+  convert_wdo_types(ts)
 }
 
 get_wdo_list <- function(request, ..., returnfields = NULL) {
@@ -103,6 +103,7 @@ get_station_list <- function(...,
                                "station_latitude",
                                "station_longitude"
                              )) {
+  # TODO identify sensible defaults for an output similar to WDO
   get_wdo_list(
     request = "getStationList",
     station_no = station_no,
@@ -122,6 +123,7 @@ get_parameter_list <- function(...,
                                  "station_name",
                                  "parametertype_name"
                                )) {
+  # TODO identify sensible defaults
   get_wdo_list(
     request = "getParameterList",
     station_no = station_no,
@@ -143,6 +145,7 @@ get_timeseries_list <- function(...,
                                   "ts_id",
                                   "ts_name"
                                 )) {
+  # TODO identify sensible defaults
   ts_list <- get_wdo_list(
     request = "getTimeseriesList",
     station_no = station_no,
