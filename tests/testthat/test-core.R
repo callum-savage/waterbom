@@ -36,9 +36,12 @@ test_that("concatenation keeps all **unique** values", {
 test_that("query options can be passed as a named list", {
   # TODO I want to be able specify all arguments in a list
   # This should work for all 'get' functions, including wrappers etc.
+  # At present, this seems to be too difficult
   # q <- list(format = "csv",
   #           request = "getStationList",
   #           station_no = c("00018", "00184"))
+  # get_wdo_response(!!!q)
+
   # get_wdo_list(!!!q)
 })
 
@@ -53,65 +56,12 @@ test_that("A url is returned if requested", {
   expect_match(wdo_url, "http://.*service=kisters")
 })
 
-test_that("responses are returned in the expected format", {
-
-  # TODO rewrite this using user-facing helper functions
-  # i.e. add content type to list_formats() or similar
-
-  # Define a helper for making a station list request
-  # st_type <- function(format) {
-  #   r = get_wdo_response(format, "getStationList", station_no = 402329)
-  #   httr2::resp_content_type(r)
-  # }
-  #
-  # expect_equal(st_type("ascii"),   "text/plain")
-  # expect_equal(st_type("html"),    "text/html")
-  # expect_equal(st_type("csv"),     "application/csv")
-  # expect_equal(st_type("json"),    "application/json")
-  # expect_equal(st_type("geojson"), "application/json")
-  # expect_equal(st_type("tabjson"), "application/json")
-  # expect_equal(st_type("objson"),  "application/json")
-  # expect_equal(st_type("lpk"),     "application/lpk")
-  # expect_equal(st_type("xlsx"),    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-  # expect_equal(st_type("kml"),     "application/vnd.google-earth.kml+xml")
-  #
-  # # Define a helper for making a timeseries request
-  #
-  # ts_type <- function(format) {
-  #   r = get_wdo_response(format, "getTimeseriesValues", ts_id = 254923010)
-  #   httr2::resp_content_type(r)
-  # }
-  #
-  # expect_equal(ts_type("dajson"), "application/json")
-  # expect_equal(ts_type("esrijson"), "application/json")
-  # expect_equal(ts_type("wml2"), "text/xml")
-  # expect_equal(ts_type("zrxp"), "text/plain")
-
-  # Other formats
-  # img_formats <- c("jpg", "png")
-  # web_formats <- "json"
-})
-
-test_that("all request types are supported", {
-  # TODO
-  # Minimal requests for all types, not just supported
-})
-
-test_that("error messages are identical across all formats", {
-  # TODO
-  # Try and raise the same error in xml, json, csv, etc.
-})
-
-test_that("query order doesn't matter", {
-  # TODO
-  # Test that providing args in a different order creates the same url
-})
-
 test_that("invalid formats raise an error", {
-  # TODO
-  # e.g. format = fakeformat
-  # And formats which don't match the request
-  # Check empty format "" too
+  expect_error(
+    get_wdo_response(format = "fakeformat", request = "getStationList"),
+    "Format fakeformat is not supported by this request"
+  )
+  # "" is not an invalid format, it just reverts to the default
 })
 
 test_that("invalid requests raise an error", {

@@ -1,4 +1,9 @@
 get_wdo_response <- function(format, request, ..., .return_url = FALSE) {
+  # TODO reorder args, format isn't actually a required field
+  # It probably shouldn't be explicit in this function
+  # (which might make list calls easier)
+
+  # TODO document dynamic dots https://rlang.r-lib.org/reference/dyn-dots.html
   # Pack all query options into a list, with error checking
   wdo_query <- construct_wdo_query(format, request, ...)
 
