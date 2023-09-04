@@ -1,8 +1,9 @@
 test_that("query options are converted to a named list", {
   q <- construct_wdo_query("f", "r", a = "x")
-  expect_true(is.list(q)) # q is a list
-  expect_named(q) # q has names
-  expect_false(any(rlang::names2(q) == "")) # no names are missing
+  expect_true(is.list(q))
+  expect_named(q)
+  # rlang::names2 converts any empty names to ""
+  expect_false(any(rlang::names2(q) == ""))
 })
 
 test_that("unnamed query options raise an error", {
@@ -65,16 +66,16 @@ test_that("invalid formats raise an error", {
 })
 
 test_that("invalid requests raise an error", {
-  # TODO
-  # request = fakerequest
-  # Check empty request "" too
-})
-
-test_that("invalid query options raise an error", {
-  # TODO
-  # fakeoption = 1
-  # I don't actually think this will, or should, raise an error
-  # Also check query options which are not valid for the request
+  # fake request
+  expect_error(
+    get_wdo_response(format = "html", request = "fakerequest"),
+    "Request parameter 'fakerequest' is unknown."
+  )
+  # empty request
+  expect_error(
+    get_wdo_response(format = "html", request = ""),
+    "Request parameter '' is unknown."
+  )
 })
 
 test_that("request info hasn't changed", {
