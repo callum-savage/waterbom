@@ -1,7 +1,22 @@
 get_wdo_response <- function(format, request, ..., .return_url = FALSE) {
+  # TODO create a function one level up from get_wdo_body which applies the
+  # correct unpacking function for the given response
+  # This could be simple: e.g text/json/xml/string else raw as a default,
+  # matching the httr2 functions
+  # Debatably that's what this function should be, but with a
+  # .return_response option for current behaviour. Or is that ugly?
+  #
+  # It could also be like .return = c("url", "httr2_response", "body").
+  # I'm leaning towards this option, with the default set as "body". Downside is
+  # that the return won't be uniform. Could have:
+  # get_wdo_url, get_wdo_response, get_wdo_body
+
   # TODO reorder args, format isn't actually a required field
   # It probably shouldn't be explicit in this function
-  # (which might make list calls easier)
+  # (which might make list calls easier). Hmmm, though it ususally defaults to
+  # html which is pretty unusable in R
+  #
+  # You know, I really only need to support features which are remotely useful
 
   # TODO document dynamic dots https://rlang.r-lib.org/reference/dyn-dots.html
   # Pack all query options into a list, with error checking
@@ -18,6 +33,7 @@ get_wdo_response <- function(format, request, ..., .return_url = FALSE) {
 }
 
 construct_wdo_query <- function(format, request, ...) {
+  # TODO consider renaming 'construct_' to 'build_' everywhere
   # Package dots into a list
   dots <- rlang::dots_list(
     ...,

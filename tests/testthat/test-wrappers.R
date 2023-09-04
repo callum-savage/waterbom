@@ -52,6 +52,7 @@ test_that("timeseries values are always returned as a tibble", {
 test_that("the return fields are idential for all timeseries", {
   # Don't know how to phrase, but I'm considering the case where different
   # timeseries might have different return fields (e.g. because of optional args)
+  # TODO I'm not sure that I've actually covered that situation yet
 
   ts <- get_timeseries_values(ts_id = c(608153010, 425964010),
                               from = "2021-01-01",
@@ -97,4 +98,8 @@ test_that("returnfields always match the returned columns for timeseries request
 test_that("A warning is raised when there is no metadata key for the timeseries", {
   # TODO
   # Could use janitor check row key tool, or just specify specific metadata options
+})
+
+test_that(".return_url can be specified from wrappers", {
+  # TODO make sure it covers timeseries and list requests
 })
