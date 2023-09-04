@@ -38,10 +38,10 @@ test_that("query options can be passed as a named list", {
   # TODO I want to be able specify all arguments in a list
   # This should work for all 'get' functions, including wrappers etc.
   # At present, this seems to be too difficult
-  # q <- list(format = "csv",
-  #           request = "getStationList",
-  #           station_no = c("00018", "00184"))
-  # get_wdo_response(!!!q)
+  q <- list(format = "csv",
+            request = "getStationList",
+            station_no = c("00018", "00184"))
+  get_wdo_response2(!!!q)
 
   # get_wdo_list(!!!q)
 })
