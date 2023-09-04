@@ -116,25 +116,36 @@ extract_body_error <- function(wdo_resp) {
 get_wdo_response2 <- function(..., .return = c("response", "request", "url", "query")) {
   # TODO I don't like '.return' as an argument
   # Too close to base return and returnfields
+  #
+  # What happens if .return is provided in a list?
 
-  query_options <- rlang::dots_list(
+  query <- rlang::dots_list(
     service = "kisters",
     type = "QueryServices",
     ...,
     .ignore_empty = "trailing"
   )
 
-  wdo_query <- purrr::map(query_options, stringr::str_flatten, collapse = ",")
+  query <- purrr::map(query, stringr::str_flatten, collapse = ",")
   # TODO any additional cleaning
 
-  wdo_req <- httr2::request("http://www.bom.gov.au/waterdata/services") |>
-    httr2::req_url_query(!!!wdo_query) |>
-    httr2::req_error(body = extract_body_error)
+  req <- httr2::request("http://www.bom.gov.au/waterdata/services") |>
+    httr2::req_url_query(!!!query) |>
+    httr2::req_error(body = body_error)
 
   switch(rlang::arg_match(.return),
-    query = wdo_query,
-    request = wdo_req,
-    url = httr2::url_parse(wdo_req$url),
-    response = httr2::req_perform(wdo_req)
+    query = query,
+    request = req,
+    url = httr2::url_parse(req$url),
+    response = httr2::req_perform(req)
   )
+}
+
+body_error <- function(resp) {
+  switch(httr2::resp_content_type(wdo_resp),
+     "text/html" = xml2::xml_text(httr2::resp_body_html(resp)),
+     "text/xml" = xml2::xml_text(httr2::resp_body_xml(resp)),
+     "application/json" = httr2::resp_body_json(resp)$message,
+     stringr::str_glue("Unexpected error content type: {content_type}")
+   )
 }
