@@ -53,6 +53,10 @@ get_timeseries_values <- function(ts_id,
                                   returnfields = c(
                                     "Timestamp", "Value", "Quality Code",
                                     "Interpolation Type")) {
+
+  # TODO make all options explicit
+  # dots should just be additional options passed onto get_wdo_response
+
   ts_resp <- get_wdo_response(
     format = "dajson", # data array json
     request = "getTimeseriesValues",

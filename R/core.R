@@ -8,6 +8,8 @@ get_wdo_response <- function(..., .return = c("response", "request", "url", "que
 
   dots <- rlang::list2(...)
 
+  # TODO make this a `check_dots()` function
+  # or perhaps check_query()
   if (length(dots) == 0) {
     rlang::abort("At least one query option must be specified.")
   } else if (!rlang::is_named(dots)) {
