@@ -3,20 +3,26 @@ convert_wdo_types <- function(wdo_data) {
   # (espec. for timezones)
 
   # Specify columns to be converted
-  numeric_cols <- c("station_latitude", "station_longitude")
-  integer_cols <- c("station_id")
-  timestamp_cols <- c("Timestamp", "from", "to")
+  dbl_cols <- c("station_latitude", "station_longitude", "Value")
+  int_cols <- c("station_id")
+  dttm_cols <- c("Timestamp", "from", "to")
+  fct_cols <- c("Quality Code", "Interpolation Type")
+  chr_cols <- setdiff(names(wdo_data), c(dbl_cols, int_cols, dttm_cols, fct_cols))
 
   # Apply conversions to all matched columns
   dplyr::mutate(
     wdo_data,
-    dplyr::across(dplyr::any_of(numeric_cols), as.numeric),
-    dplyr::across(dplyr::any_of(integer_cols), as.integer),
-    dplyr::across(dplyr::any_of(timestamp_cols), lubridate::as_datetime)
+    dplyr::across(dplyr::any_of(dbl_cols), as.numeric),
+    dplyr::across(dplyr::any_of(int_cols), as.integer),
+    dplyr::across(dplyr::any_of(dttm_cols), lubridate::as_datetime),
+    dplyr::across(dplyr::any_of(fct_cols), forcats::as_factor),
+    dplyr::across(dplyr::all_of(chr_cols), as.character)
   )
+
+  # TODO reorder and recode factor columns (perhaps in differnt function)
 }
 
-unpack_ts <- function(ts_json, md_returnfields) {
+unpack_timeseries <- function(ts_json, md_returnfields) {
   # Identify metadata values
   ts_metadata <- ts_json[md_returnfields]
 
@@ -24,11 +30,15 @@ unpack_ts <- function(ts_json, md_returnfields) {
   ts_colnames <- stringr::str_split_1(ts_json$columns, ",")
 
   # Convert the timeseries json into a tibble
-  ts_rows <- tibble::tibble("ts_col" = ts_json$data)
-  ts <- tidyr::unnest_wider(ts_rows, "ts_col", names_sep = "_")
-
-  # Apply the correct column names to the timeseries
-  names(ts) <- ts_colnames
+  if (length(ts_json$data) == 0) {
+    # Construct an empty tibble when no data returned
+    ts <- tibble::tibble(!!!rlang::set_names(ts_colnames), .rows = 0)
+  } else {
+    # Else unpack the json list
+    ts_rows <- tibble::tibble("ts_col" = ts_json$data)
+    ts <- tidyr::unnest_wider(ts_rows, "ts_col", names_sep = "_")
+    ts <- rlang::set_names(ts, ts_colnames)
+  }
 
   # Return the timeseries, with metadata columns as a key
   tibble::tibble(!!!ts_metadata, ts)
@@ -40,7 +50,9 @@ get_timeseries_values <- function(ts_id,
                                   to = NULL,
                                   timezone = "UTC",
                                   md_returnfields = c("ts_id", "station_no"),
-                                  returnfields = c("Timestamp", "Value", "Quality Code", "Interpolation Type")) {
+                                  returnfields = c(
+                                    "Timestamp", "Value", "Quality Code",
+                                    "Interpolation Type")) {
   ts_resp <- get_wdo_response(
     format = "dajson", # data array json
     request = "getTimeseriesValues",
@@ -56,25 +68,43 @@ get_timeseries_values <- function(ts_id,
   # TODO consider allowing the return of a nested tibble
   ts_resp_body <- httr2::resp_body_json(ts_resp)
 
+  # TODO consider:
+  # returnfields = c("all", "recommended", "default", "minimal")
+  # or a character vector with the above + column names
+  # e.g. returnfields = c("default", "data_owner_name")
+
   # Unpack each timeseries separately into a list of tibbles
-  ts_list <- purrr::map(ts_resp_body, unpack_ts, md_returnfields)
+  ts_list <- purrr::map(ts_resp_body, unpack_timeseries, md_returnfields)
 
   # Combine all timeseries into a single tibble
   ts <- purrr::list_rbind(ts_list)
 
   # Apply type conversions
   convert_wdo_types(ts)
+
+  # TODO rename 'Value' into the parameter name
+  # This might cause issues if multiple timeseries requested
 }
 
 get_wdo_list <- function(request, ..., returnfields = NULL) {
   # TODO check that request is a list request using rlang::arg_match
   # https://design.tidyverse.org/enumerate-options.html
 
+  # TODO replace with helper function, and only use recommended requests
+  list_requests <- wdo_formats |>
+    dplyr::filter(format == "csv") |>
+    dplyr::filter(stringr::str_detect(request, "List")) |>
+    dplyr::pull(request)
+
+  rlang::arg_match(request, list_requests)
+
+  query_options <- rlang::list2(format = "csv",
+                                request = request,
+                                returnfields = returnfields,
+                                ...)
+
   # Get response in csv format
-  wdo_list_resp <- get_wdo_response(format = "csv",
-                                    request = request,
-                                    returnfields = returnfields,
-                                    ...)
+  wdo_list_resp <- get_wdo_response(!!!query_options)
 
   # Extract response body
   wdo_list_body <- httr2::resp_body_string(wdo_list_resp)
