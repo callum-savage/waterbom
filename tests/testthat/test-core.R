@@ -36,14 +36,7 @@ test_that("arguments can be specified by splicing a named list", {
   # get the url with query options in a list
   q1 <- list(request = "getStationList", station_no = "00018")
   url1 <- get_wdo_response(!!!q1, .return = "url")
-
-  # get the url .return added to the list
-  q2 <- c(query_list, .return = "url")
-  url2 <- get_wdo_response(!!!q2)
-
-  # compare
   expect_equal(url, url1)
-  expect_equal(url, url2)
 })
 
 test_that("trailing commas are ignored", {
@@ -78,9 +71,4 @@ test_that("the API specificaiton hasn't changed", {
   resp <- get_wdo_response(format = "json", request = "getRequestInfo")
   request_info <- httr2::resp_body_json(resp)
   expect_snapshot(request_info)
-})
-
-test_that("unused query options raise a warning", {
-  # TODO This is mostly to avoid silently dropping query options when the
-  # query is otherwise valid. This will be easiest to do using wdo_query_fields.
 })
