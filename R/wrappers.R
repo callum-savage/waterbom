@@ -19,7 +19,7 @@ convert_wdo_types <- function(wdo_data) {
     dplyr::across(dplyr::all_of(chr_cols), as.character)
   )
 
-  # TODO reorder and recode factor columns (perhaps in differnt function)
+  # TODO reorder and recode factor columns (perhaps in different function)
 }
 
 get_wdo_list <- function(request, ..., returnfields = NULL) {
@@ -57,8 +57,12 @@ get_wdo_list <- function(request, ..., returnfields = NULL) {
     col_types = readr::cols(.default = "c"),
     progress = FALSE
   )
+  # Remove any duplicated rows
+  wdo_list <- dplyr::distinct(wdo_list)
   # Apply column type conversions
-  convert_wdo_types(wdo_list)
+  wdo_list <- convert_wdo_types(wdo_list)
+  # Sort by columns
+  dplyr::arrange(wdo_list, dplyr::across(dplyr::any_of(c("station_no", "station_id", "station_name", "parameter_type_name"))))
 }
 
 get_station_list <- function(...,
@@ -75,6 +79,8 @@ get_station_list <- function(...,
   # TODO identify sensible defaults for an output similar to WDO
   # TODO make output distinct
   # TODO sort output by station_no
+  # TODO ensure output is unique by station, which is not the case when e.g.
+  # parametertype_name is specified
   get_wdo_list(
     request = "getStationList",
     station_no = station_no,
