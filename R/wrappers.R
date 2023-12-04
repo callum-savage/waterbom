@@ -91,17 +91,24 @@ get_timeseries_values <- function(ts_id,
 }
 
 get_wdo_list <- function(request, ..., returnfields = NULL) {
-  # TODO check that request is a list request using rlang::arg_match
-  # https://design.tidyverse.org/enumerate-options.html
-
-  # TODO replace with helper function, and only use recommended requests
-  list_requests <- wdo_formats |>
-    dplyr::filter(format == "csv") |>
-    dplyr::filter(stringr::str_detect(request, "List")) |>
-    dplyr::pull(request)
-
+  # Only a subset of requests are supported. The main reason for this is to
+  # minimise the scope of the initial development process, however there is no
+  # reason this couldn't be relaxed.
+  list_requests <- c(
+    "getStationList",
+    "getParameterList",
+    "getTimeseriesList"
+    #"getSiteList",
+    #"getParameterTypeList",
+    #"getTimeseriesTypeList",
+    #"getGroupList",
+    #"getCatchmentList",
+    #"getRiverList",
+    #"getGraphTemplateList"
+  )
   rlang::arg_match(request, list_requests)
 
+  # Specify query options
   query_options <- rlang::list2(format = "csv",
                                 request = request,
                                 returnfields = returnfields,
@@ -109,10 +116,8 @@ get_wdo_list <- function(request, ..., returnfields = NULL) {
 
   # Get response in csv format
   wdo_list_resp <- get_wdo_response(!!!query_options)
-
   # Extract response body
   wdo_list_body <- httr2::resp_body_string(wdo_list_resp)
-
   # Convert csv body into a tibble
   wdo_list <- readr::read_delim(
     wdo_list_body,
@@ -120,23 +125,24 @@ get_wdo_list <- function(request, ..., returnfields = NULL) {
     col_types = readr::cols(.default = "c"),
     progress = FALSE
   )
-
   # Apply column type conversions
   convert_wdo_types(wdo_list)
 }
 
 get_station_list <- function(...,
-                             station_no = NULL,
-                             station_name = NULL,
-                             parametertype_name = "*",
+                             station_no = NULL, # station_number
+                             station_name = NULL, # station_name
+                             parametertype_name = "*", # parameter
                              bbox = NULL,
-                             returnfields = c(
+                             returnfields = c( # return_fields
                                "station_no",
                                "station_name",
-                               "station_latitude",
-                               "station_longitude"
+                               "station_latitude", # latitude
+                               "station_longitude" # longitude
                              )) {
   # TODO identify sensible defaults for an output similar to WDO
+  # TODO make output distinct
+  # TODO sort output by station_no
   get_wdo_list(
     request = "getStationList",
     station_no = station_no,
