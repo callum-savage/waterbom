@@ -1,83 +1,13 @@
-# at least one query option must be provided
-
-    Code
-      get_wdo_response()
-    Condition
-      Error in `get_wdo_response()`:
-      ! At least one query option must be specified.
-
----
-
-    Code
-      get_wdo_response(.return = "url")
-    Condition
-      Error in `get_wdo_response()`:
-      ! At least one query option must be specified.
-
-# unnamed query options raise an error
-
-    Code
-      get_wdo_response("x")
-    Condition
-      Error in `get_wdo_response()`:
-      ! All query options must be named
-
----
-
-    Code
-      get_wdo_response("x", .return = "url")
-    Condition
-      Error in `get_wdo_response()`:
-      ! All query options must be named
-
-# .return can only be one of the specified values
-
-    Code
-      get_wdo_response(a = "x", .return = "happiness")
-    Condition
-      Error in `get_wdo_response()`:
-      ! `.return` must be one of "response", "request", "url", or "query", not "happiness".
-
-# query options can be passed as a named list
-
-    Code
-      get_wdo_response(!!!query_list)
-    Message
-      <httr2_response>
-      GET
-      http://www.bom.gov.au/waterdata/services?service=kisters&type=QueryServices&request=getStationList&station_no=00018
-      Status: 200 OK
-      Content-Type: text/html
-      Body: In memory (561 bytes)
-
-# invalid formats raise an error
-
-    Code
-      get_wdo_response(format = "fakeformat", request = "getStationList")
-    Condition
-      Error in `httr2::req_perform()`:
-      ! HTTP 500 Internal Server Error.
-      * Format fakeformat is not supported by this request.
-
 # invalid requests raise an error
 
     Code
-      get_wdo_response(format = "html", request = "fakerequest")
+      get_wdo_response(format = "html", request = "fakeRequest")
     Condition
       Error in `httr2::req_perform()`:
       ! HTTP 500 Internal Server Error.
-      * Request parameter 'fakerequest' is unknown.
+      * Request parameter 'fakeRequest' is unknown.
 
----
-
-    Code
-      get_wdo_response(format = "html", request = "")
-    Condition
-      Error in `httr2::req_perform()`:
-      ! HTTP 500 Internal Server Error.
-      * Request parameter '' is unknown.
-
-# request info hasn't changed
+# the API specificaiton hasn't changed
 
     Code
       request_info

@@ -64,7 +64,10 @@ test_that("invalid formats raise an error", {
 
 test_that("invalid requests raise an error", {
   # fake request
-  expect_snapshot(get_wdo_response(format = "html", request = "fakeRequest"))
+  expect_snapshot(
+    get_wdo_response(format = "html", request = "fakeRequest"),
+    error = TRUE
+  )
 
   # empty request
   expect_error(get_wdo_response(format = "html", request = ""))

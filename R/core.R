@@ -1,15 +1,12 @@
-get_wdo_response <- function(..., .return = c("response", "request", "url", "query")) {
+get_wdo_response <- function(..., .return = c("response", "request", "url", "query", "dry_run")) {
   # TODO make sure .return can be passed in a list
   # TODO document dynamic dots https://rlang.r-lib.org/reference/dyn-dots.html
   # TODO implement arg match for request and query, and maybe others...?
-  # TODO implement response caching
+  # TODO implement response caching (httr2::req_cache)
 
   return_type <- rlang::arg_match(.return)
 
   dots <- rlang::list2(...)
-
-  # TODO make this a `check_dots()` function
-  # or perhaps check_query()
   if (length(dots) == 0) {
     rlang::abort("At least one query option must be specified.")
   } else if (!rlang::is_named(dots)) {
@@ -28,12 +25,14 @@ get_wdo_response <- function(..., .return = c("response", "request", "url", "que
   req <- httr2::request("http://www.bom.gov.au/waterdata/services") |>
     httr2::req_url_query(!!!query) |>
     httr2::req_error(body = body_error)
+  # TODO add user-agent (httr2::req_user_agent)
 
   switch(return_type,
-    "query" = query,
+    "response" = httr2::req_perform(req),
     "request" = req,
     "url" = httr2::url_parse(req$url),
-    "response" = httr2::req_perform(req)
+    "query" = query,
+    "dry_run" = httr2::req_dry_run(req)
   )
 }
 
