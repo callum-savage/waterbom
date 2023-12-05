@@ -1,10 +1,4 @@
 get_wdo_response <- function(..., .return = c("response", "request", "url", "query", "dry_run")) {
-  # TODO document dynamic dots https://rlang.r-lib.org/reference/dyn-dots.html
-  # TODO implement arg match for request and query, and maybe others...?
-  # TODO Ensure that splicing .return into ... raises a warning (similar to
-  # other invalid args)
-  # TODO make sure unused query options raise a warning (similar to above)
-  # TODO implement response caching (httr2::req_cache)
 
   return_type <- rlang::arg_match(.return)
 
@@ -26,8 +20,7 @@ get_wdo_response <- function(..., .return = c("response", "request", "url", "que
 
   req <- httr2::request("http://www.bom.gov.au/waterdata/services") |>
     httr2::req_url_query(!!!query) |>
-    httr2::req_error(body = body_error)
-  # TODO add user-agent (httr2::req_user_agent)
+    httr2::req_error(body = body_error) |>
 
   switch(return_type,
     "response" = httr2::req_perform(req),
