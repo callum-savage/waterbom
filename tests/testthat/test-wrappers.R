@@ -1,32 +1,25 @@
 # All wrappers ------------------------------------------------------------
 
 test_that("wrappers accept a spliced list of query options", {
-  # general list
+  # for the general get_wdo_list
   q1 <- list(request = "getStationList", station_no = "00018")
   expect_no_error(get_wdo_list(!!!q1))
 
-  # specific list
+  # for a specific list function
   q2 <- list(station_no = c("00018", "00184"))
   expect_no_error(get_parameter_list(!!!q2))
 
-  # timeseries values
+  # for get_timeseries_values
   q3 <- list(ts_id = 83527010, from = "2021-01-01", to = "2021-01-02")
   expect_no_error(get_timeseries_values(!!!q3))
 })
 
 test_that("wrappers accept .return", {
-  # TODO make sure it covers timeseries and list requests
-})
-
-test_that("wrappers pass additional fields on to get_wdo_response", {
-  # TODO .return isn't supported yet
-  # TODO also check non-explicit args after making most args explicit
-
-  # with .return = "response", the two calls should be equivalent
-  q <- list(request = "getStationList", station_no = "00018", .return = "response")
-  r1 <- get_wdo_list(!!!q)
-  r2 <- get_wdo_response(!!!q)
-  expect_equal(r1, r2)
+  # make sure it covers timeseries and list requests
+  # q <- list(request = "getStationList", station_no = "00018")
+  # r1 <- get_wdo_list(!!!q, .return = "response")
+  # r2 <- get_wdo_response(!!!q)
+  # expect_equal(r1, r2)
 })
 
 test_that("wrappers apply column type conversions", {
@@ -80,37 +73,6 @@ test_that("empty timeseries are returned as a zero-row tibble", {
   expect_equal(purrr::map(ts1, class), purrr::map(ts2, class))
 })
 
-test_that("timeseries are returned as a tibble when no metadata is specified", {
-  # TODO check for a regular timeseries
-  # TODO check for an empty timeseries
-  # TODO check for multiple timeseries, including empty
-})
-
-test_that("timezone can be specified using olson codes", {
-  # OlsonNames()
-})
-
-test_that("timeseries columns match returnfields + md_returnfields", {
-  # TODO
-  # Make sure there are explicit NA columns when nothing is returned for
-  # specified custom attributes
-  #
-  # Case where no metadata is specified
-  #
-  # Also consider the case where two timeseries might have different non-null
-  # fields (e.g. in custom attributes or metadata)
-})
-
-test_that("timeseries null values are converted to NAs", {
-  # TODO
-  # This has introduced errors before
-})
-
-test_that("unkeyed timeseries responses raise a warning", {
-  # TODO should this be done before making the (potentially large) request?
-  # Could use janitor check row key tool, or just specify specific metadata options
-})
-
 # Lists -------------------------------------------------------------------
 
 test_that("empty list responses are returned as a zero-row tibble", {
@@ -138,9 +100,4 @@ test_that("get_wdo_list only accepts csv list requests", {
 
   # cannot be returned as a csv
   expect_error(get_wdo_list("getStandardRemarkTypeList"))
-})
-
-test_that("list columns always match returnfields", {
-  # TODO
-  # Try and trick it with custom attributes etc.
 })

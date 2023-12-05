@@ -20,7 +20,7 @@ get_wdo_response <- function(..., .return = c("response", "request", "url", "que
 
   req <- httr2::request("http://www.bom.gov.au/waterdata/services") |>
     httr2::req_url_query(!!!query) |>
-    httr2::req_error(body = body_error) |>
+    httr2::req_error(body = body_error)
 
   switch(return_type,
     "response" = httr2::req_perform(req),
