@@ -60,11 +60,12 @@ get_wdo_list <- function(request, ..., .return = c("response", "request", "url",
 # wdo_query_fields |> dplyr::filter(request == "getStationList")
 # bbox uses 'global' crs (see crs in wdo_optional_fields)
 # Need to think about handling of custom attributes
-get_station_list <- function(...,
-                             station_no = NULL,
+# There are no dots, but more flexible usage can be achieved with:
+# get_wdo_list("getStationList", etc.)
+get_station_list <- function(station_no = NULL,
                              station_id = NULL,
                              station_name = NULL,
-                             parametertype_name = "*",
+                             parametertype_name = "*", # By default require a parameter
                              bbox = NULL,
                              returnfields = c(
                                "station_id",
@@ -77,13 +78,13 @@ get_station_list <- function(...,
 
   get_wdo_list(
     request = "getStationList",
+    flatten = "true", # Ensure that only one row is returned per station id
     station_no = station_no,
+    station_id = station_id,
     station_name = station_name,
     parametertype_name = parametertype_name,
     bbox = bbox,
-    returnfields = returnfields,
-    ...,
-    flatten = "true" # Ensure that only one row is returned per station id
+    returnfields = returnfields
   )
 }
 
