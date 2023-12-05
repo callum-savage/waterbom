@@ -1,12 +1,10 @@
 convert_wdo_types <- function(wdo_data) {
-  # TODO test that this converts datetimes correctly
-  # (espec. for timezones)
-
   # Specify columns to be converted
   dbl_cols <- c("station_latitude", "station_longitude", "Value")
   int_cols <- c("station_id")
   dttm_cols <- c("Timestamp", "from", "to")
   fct_cols <- c("Quality Code", "Interpolation Type")
+  # Make sure everything else is a character
   chr_cols <- setdiff(names(wdo_data), c(dbl_cols, int_cols, dttm_cols, fct_cols))
 
   # Apply conversions to all matched columns
@@ -18,8 +16,6 @@ convert_wdo_types <- function(wdo_data) {
     dplyr::across(dplyr::any_of(fct_cols), forcats::as_factor),
     dplyr::across(dplyr::all_of(chr_cols), as.character)
   )
-
-  # TODO reorder and recode factor columns (perhaps in different function)
 }
 
 get_wdo_list <- function(request, ..., returnfields = NULL) {
@@ -76,11 +72,7 @@ get_station_list <- function(...,
                                "station_latitude", # latitude
                                "station_longitude" # longitude
                              )) {
-  # TODO identify sensible defaults for an output similar to WDO
-  # TODO make output distinct
-  # TODO sort output by station_no
-  # TODO ensure output is unique by station, which is not the case when e.g.
-  # parametertype_name is specified
+
   get_wdo_list(
     request = "getStationList",
     station_no = station_no,
@@ -100,7 +92,6 @@ get_parameter_list <- function(...,
                                  "station_name",
                                  "parametertype_name"
                                )) {
-  # TODO identify sensible defaults
   get_wdo_list(
     request = "getParameterList",
     station_no = station_no,
@@ -122,7 +113,6 @@ get_timeseries_list <- function(...,
                                   "ts_id",
                                   "ts_name"
                                 )) {
-  # TODO identify sensible defaults
   ts_list <- get_wdo_list(
     request = "getTimeseriesList",
     station_no = station_no,
@@ -134,7 +124,6 @@ get_timeseries_list <- function(...,
   )
 
   # Sort output by station, parameter, and ts_id
-  # TODO: It would be better to sort by ts_id descending
   sort_cols <- c("station_id", "station_no", "station_name",
                  "parametertype_name", "ts_id")
   dplyr::arrange(ts_list, dplyr::pick(dplyr::any_of(sort_cols)))
@@ -171,10 +160,6 @@ get_timeseries_values <- function(ts_id,
                                   returnfields = c(
                                     "Timestamp", "Value", "Quality Code",
                                     "Interpolation Type")) {
-
-  # TODO make all options explicit
-  # dots should just be additional options passed onto get_wdo_response
-
   ts_resp <- get_wdo_response(
     format = "dajson", # data array json
     request = "getTimeseriesValues",
@@ -187,13 +172,7 @@ get_timeseries_values <- function(ts_id,
     returnfields = returnfields,
     ...
   )
-  # TODO consider allowing the return of a nested tibble
   ts_resp_body <- httr2::resp_body_json(ts_resp)
-
-  # TODO consider:
-  # returnfields = c("all", "recommended", "default", "minimal")
-  # or a character vector with the above + column names
-  # e.g. returnfields = c("default", "data_owner_name")
 
   # Unpack each timeseries separately into a list of tibbles
   ts_list <- purrr::map(ts_resp_body, unpack_timeseries, md_returnfields)
@@ -203,7 +182,4 @@ get_timeseries_values <- function(ts_id,
 
   # Apply type conversions
   convert_wdo_types(ts)
-
-  # TODO rename 'Value' into the parameter name
-  # This might cause issues if multiple timeseries requested
 }
