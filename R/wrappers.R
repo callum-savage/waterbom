@@ -38,6 +38,7 @@ get_wdo_list <- function(request, ..., .return = c("response", "request", "url",
   # Get response as a csv
   query_options <- rlang::list2(
     format = "csv",
+    csvdiv = ";", # Explicit, so it can't be overwritten in dots
     request = request,
     ...,
     .return = .return
@@ -88,29 +89,31 @@ get_station_list <- function(station_no = NULL,
   )
 }
 
-get_parameter_list <- function(...,
-                               station_no = NULL,
-                               parametertype_name = "*",
+get_parameter_list <- function(station_no = NULL,
+                               station_id = NULL,
+                               parametertype_name = NULL,
                                returnfields = c(
+                                 "station_id",
                                  "station_no",
                                  "station_name",
+                                 "parametertype_id",
                                  "parametertype_name"
                                )) {
   get_wdo_list(
     request = "getParameterList",
     station_no = station_no,
     parametertype_name = parametertype_name,
-    returnfields = returnfields,
-    ...
+    returnfields = returnfields
   )
 }
 
-get_timeseries_list <- function(...,
-                                station_no = NULL,
+get_timeseries_list <- function(station_no = NULL,
+                                station_id = NULL,
                                 parametertype_name = NULL,
                                 ts_id = NULL,
                                 ts_name = NULL,
                                 returnfields = c(
+                                  "station_id",
                                   "station_no",
                                   "station_name",
                                   "parametertype_name",
@@ -123,8 +126,7 @@ get_timeseries_list <- function(...,
     parametertype_name = parametertype_name,
     ts_id = ts_id,
     ts_name = ts_name,
-    returnfields = returnfields,
-    ...
+    returnfields = returnfields
   )
 
   # Sort output by station, parameter, and ts_id
