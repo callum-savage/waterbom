@@ -14,14 +14,6 @@ test_that("wrappers accept a spliced list of query options", {
   expect_no_error(get_timeseries_values(!!!q3))
 })
 
-test_that("wrappers accept .return", {
-  # make sure it covers timeseries and list requests
-  # q <- list(request = "getStationList", station_no = "00018")
-  # r1 <- get_wdo_list(!!!q, .return = "response")
-  # r2 <- get_wdo_response(!!!q)
-  # expect_equal(r1, r2)
-})
-
 test_that("wrappers apply column type conversions", {
   # most converted cols are in timeseries values
   df1 <- get_timeseries_values(
