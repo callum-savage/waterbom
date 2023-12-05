@@ -18,59 +18,61 @@ convert_wdo_types <- function(wdo_data) {
   )
 }
 
-get_wdo_list <- function(request, ..., returnfields = NULL) {
-  # Only a subset of requests are supported. The main reason for this is to
-  # minimise the scope of the initial development process, however there is no
-  # reason this couldn't be relaxed.
+get_wdo_list <- function(request, ..., .return = c("response", "request", "url", "query", "dry_run")) {
+  # This function supports 'getList' requests which can return a csv
+  # Not all of these requests are useful, but they will work
   list_requests <- c(
     "getStationList",
     "getParameterList",
-    "getTimeseriesList"
-    #"getSiteList",
-    #"getParameterTypeList",
-    #"getTimeseriesTypeList",
-    #"getGroupList",
-    #"getCatchmentList",
-    #"getRiverList",
-    #"getGraphTemplateList"
+    "getTimeseriesList",
+    "getSiteList",
+    "getParameterTypeList",
+    "getTimeseriesTypeList",
+    "getGroupList",
+    "getCatchmentList",
+    "getRiverList",
+    "getGraphTemplateList"
   )
   rlang::arg_match(request, list_requests)
 
-  # Specify query options
-  query_options <- rlang::list2(format = "csv",
-                                request = request,
-                                returnfields = returnfields,
-                                ...)
-
-  # Get response in csv format
+  # Get response as a csv
+  query_options <- rlang::list2(
+    format = "csv",
+    request = request,
+    ...,
+    .return = .return
+  )
   wdo_list_resp <- get_wdo_response(!!!query_options)
-  # Extract response body
   wdo_list_body <- httr2::resp_body_string(wdo_list_resp)
-  # Convert csv body into a tibble
+
   wdo_list <- readr::read_delim(
     wdo_list_body,
     delim = ";",
     col_types = readr::cols(.default = "c"),
     progress = FALSE
   )
-  # Remove any duplicated rows
+
+  # Tidy up output
   wdo_list <- dplyr::distinct(wdo_list)
-  # Apply column type conversions
-  wdo_list <- convert_wdo_types(wdo_list)
-  # Sort by columns
-  dplyr::arrange(wdo_list, dplyr::across(dplyr::any_of(c("station_no", "station_id", "station_name", "parameter_type_name"))))
+  convert_wdo_types(wdo_list)
 }
 
+# wdo_query_fields |> dplyr::filter(request == "getStationList")
+# bbox uses 'global' crs (see crs in wdo_optional_fields)
+# Need to think about handling of custom attributes
 get_station_list <- function(...,
-                             station_no = NULL, # station_number
-                             station_name = NULL, # station_name
-                             parametertype_name = "*", # parameter
+                             station_no = NULL,
+                             station_id = NULL,
+                             station_name = NULL,
+                             parametertype_name = "*",
                              bbox = NULL,
-                             returnfields = c( # return_fields
+                             returnfields = c(
+                               "station_id",
                                "station_no",
                                "station_name",
-                               "station_latitude", # latitude
-                               "station_longitude" # longitude
+                               "station_latitude",
+                               "station_longitude",
+                               "parametertype_name"
                              )) {
 
   get_wdo_list(
@@ -80,7 +82,8 @@ get_station_list <- function(...,
     parametertype_name = parametertype_name,
     bbox = bbox,
     returnfields = returnfields,
-    ...
+    ...,
+    flatten = "true" # Ensure that only one row is returned per station id
   )
 }
 
