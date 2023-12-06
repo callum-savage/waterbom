@@ -93,3 +93,19 @@ test_that("get_wdo_list only accepts csv list requests", {
   # cannot be returned as a csv
   expect_error(get_wdo_list("getStandardRemarkTypeList"))
 })
+
+test_that("get_station_list always returns one row per station_id", {
+  # Station request which returns multiple rows
+  df1 <- get_wdo_list(
+    "getStationList",
+    station_no = "410704",
+    returnfields = c("station_name", "station_no", "parametertype_name")
+  )
+  # Same request using get_station_list
+  df2 <- get_station_list(
+    station_no = "410704",
+    returnfields = c("station_name", "station_no", "parametertype_name")
+  )
+  expect_true(nrow(df1) > nrow(df2))
+  expect_equal(nrow(df2), 1)
+})
