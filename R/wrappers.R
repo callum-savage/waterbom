@@ -55,7 +55,13 @@ get_wdo_list <- function(request, ..., .return = c("response", "request", "url",
 
   # Tidy up output
   wdo_list <- dplyr::distinct(wdo_list)
-  convert_wdo_types(wdo_list)
+  wdo_list <- convert_wdo_types(wdo_list)
+
+  # Define a sort order for all returned list requests:
+  # station > paramter > ts
+  key_cols <- c("station_uuid", "station_id", "station_no", "station_name",
+                "parametertype_id", "parametertype_name", "ts_id", "ts_name")
+  dplyr::arrange(wdo_list, dplyr::across(dplyr::any_of(key_cols)))
 }
 
 # wdo_query_fields |> dplyr::filter(request == "getStationList")
