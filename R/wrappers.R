@@ -158,7 +158,6 @@ unpack_timeseries <- function(ts_json, md_returnfields) {
 }
 
 get_timeseries_values <- function(ts_id,
-                                  ...,
                                   from = NULL,
                                   to = NULL,
                                   timezone = "UTC",
@@ -175,8 +174,7 @@ get_timeseries_values <- function(ts_id,
     timezone = timezone,
     metadata = "true",
     md_returnfields = md_returnfields,
-    returnfields = returnfields,
-    ...
+    returnfields = returnfields
   )
   ts_resp_body <- httr2::resp_body_json(ts_resp)
 
