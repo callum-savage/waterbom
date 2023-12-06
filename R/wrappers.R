@@ -66,6 +66,8 @@ get_wdo_list <- function(request, ..., .return = c("response", "request", "url",
 
 # wdo_query_fields |> dplyr::filter(request == "getStationList")
 # bbox uses 'global' crs (see crs in wdo_optional_fields)
+# Note that stations with no coords are returned by default, perhaps could be
+# controlled with an arg, require_coords = TRUE.
 # Need to think about handling of custom attributes
 # There are no dots, but more flexible usage can be achieved with:
 # get_wdo_list("getStationList", etc.)
